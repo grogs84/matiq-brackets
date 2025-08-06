@@ -14,7 +14,9 @@ function App() {
         { id: 'w2', name: 'Nick Suriano', seed: 2, school: 'Rutgers' }
       ],
       round: 'final',
-      status: 'upcoming'
+      status: 'upcoming',
+      previousMatch: { winner: 'semi1', loser: 'semi2' },
+      nextMatch: { winner: null, loser: null }
     },
     {
       id: 'semi1',
@@ -23,7 +25,9 @@ function App() {
         { id: 'w4', name: 'Pat Glory', seed: 4, school: 'Princeton' }
       ],
       round: 'semifinals',
-      status: 'upcoming'
+      status: 'upcoming',
+      previousMatch: { winner: 'qf1', loser: 'qf2' },
+      nextMatch: { winner: 'final', loser: null }
     },
     {
       id: 'semi2',
@@ -32,7 +36,53 @@ function App() {
         { id: 'w6', name: 'Sean Russell', seed: 6, school: 'Minnesota' }
       ],
       round: 'semifinals',
-      status: 'upcoming'
+      status: 'upcoming',
+      previousMatch: { winner: 'qf3', loser: 'qf4' },
+      nextMatch: { winner: 'final', loser: null }
+    },
+    {
+      id: 'qf1',
+      participants: [
+        { id: 'w7', name: 'Austin DeSanto', seed: 7, school: 'Iowa' },
+        { id: 'w8', name: 'Brandon Courtney', seed: 8, school: 'Arizona State' }
+      ],
+      round: 'quarterfinals',
+      status: 'upcoming',
+      previousMatch: { winner: null, loser: null },
+      nextMatch: { winner: 'semi1', loser: null }
+    },
+    {
+      id: 'qf2',
+      participants: [
+        { id: 'w9', name: 'Hayden Hidlay', seed: 9, school: 'NC State' },
+        { id: 'w10', name: 'Kaleb Young', seed: 10, school: 'Iowa' }
+      ],
+      round: 'quarterfinals',
+      status: 'upcoming',
+      previousMatch: { winner: null, loser: null },
+      nextMatch: { winner: 'semi1', loser: null }
+    },
+    {
+      id: 'qf3',
+      participants: [
+        { id: 'w11', name: 'Jack Mueller', seed: 11, school: 'Virginia' },
+        { id: 'w12', name: 'Thomas Gilman', seed: 12, school: 'Navy' }
+      ],
+      round: 'quarterfinals',
+      status: 'upcoming',
+      previousMatch: { winner: null, loser: null },
+      nextMatch: { winner: 'semi2', loser: null }
+    },
+    {
+      id: 'qf4',
+      participants: [
+        { id: 'w13', name: 'Jace Koelzer', seed: 13, school: 'Northern Iowa' },
+        { id: 'w14', name: 'Ethan Lizak', seed: 14, school: 'Minnesota' }
+      ],
+      round: 'quarterfinals',
+      status: 'upcoming',
+      previousMatch: { winner: null, loser: null },
+      nextMatch: { winner: 'semi2', loser: null }
     }
   ]
 
