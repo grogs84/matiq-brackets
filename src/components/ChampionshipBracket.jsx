@@ -84,6 +84,55 @@ const calculateResponsiveLayout = (rounds, options = {}) => {
 };
 
 /**
+ * Build rounds based on tournament tree structure (database agnostic)
+ * Uses previousMatch/nextMatch pointers instead of custom round fields
+ */
+const buildRoundsFromTree = (matches) => {
+  const rounds = [];
+  const matchMap = {};
+  
+  // Create lookup map
+  matches.forEach(match => {
+    matchMap[match.id] = match;
+  });
+  
+  // Find first round (matches with no previousMatch or previousMatch.winner === null)
+  const firstRound = matches.filter(match => 
+    !match.previousMatch || match.previousMatch.winner === null
+  );
+  
+  if (firstRound.length > 0) {
+    rounds.push(firstRound);
+    
+    // Build subsequent rounds by following nextMatch pointers
+    let currentRound = firstRound;
+    while (currentRound.length > 1) {
+      const nextRound = [];
+      const nextMatchIds = new Set();
+      
+      currentRound.forEach(match => {
+        if (match.nextMatch?.winner && !nextMatchIds.has(match.nextMatch.winner)) {
+          const nextMatch = matchMap[match.nextMatch.winner];
+          if (nextMatch) {
+            nextRound.push(nextMatch);
+            nextMatchIds.add(match.nextMatch.winner);
+          }
+        }
+      });
+      
+      if (nextRound.length > 0) {
+        rounds.push(nextRound);
+        currentRound = nextRound;
+      } else {
+        break;
+      }
+    }
+  }
+  
+  return rounds;
+};
+
+/**
  * ChampionshipBracket - Renders responsive championship bracket matches
  * 
  * Expects matches with embedded participant data:
@@ -93,25 +142,8 @@ const ChampionshipBracket = ({
   matches = [],
   onMatchClick 
 }) => {
-  // Build rounds based on the round field in the data
-  // This is simpler and more reliable than traversing match connections
-  const rounds = [];
-  
-  // Group matches by round number
-  const matchesByRound = {};
-  matches.forEach(match => {
-    const roundNum = match.round;
-    if (!matchesByRound[roundNum]) {
-      matchesByRound[roundNum] = [];
-    }
-    matchesByRound[roundNum].push(match);
-  });
-  
-  // Build rounds array in order
-  const roundNumbers = Object.keys(matchesByRound).map(Number).sort((a, b) => a - b);
-  roundNumbers.forEach(roundNum => {
-    rounds.push(matchesByRound[roundNum]);
-  });
+  // Build rounds using tournament tree logic (database agnostic)
+  const rounds = buildRoundsFromTree(matches);
 
   // Calculate responsive layout based on available space
   const layout = calculateResponsiveLayout(rounds);
