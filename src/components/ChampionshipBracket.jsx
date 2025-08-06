@@ -8,62 +8,59 @@ import React from 'react';
 const calculateResponsiveLayout = (rounds, options = {}) => {
   if (rounds.length === 0) return { positions: {}, dimensions: { width: 400, height: 300 } };
 
-  // Default options with responsive considerations
+  // Default options with larger container for better initial layout
   const {
-    containerWidth = 900,
-    containerHeight = 700,
-    padding = 40,
-    minMatchWidth = 120,
-    minMatchHeight = 60,
-    minSpacing = 40
+    containerWidth = 1200,
+    containerHeight = 800,
+    padding = 60,
+    minMatchWidth = 140,
+    minMatchHeight = 70,
+    minSpacing = 20
   } = options;
 
-  // Calculate available space
+  // Calculate spacing between rounds
   const availableWidth = containerWidth - (2 * padding);
-  const availableHeight = containerHeight - (2 * padding);
-
-  // Calculate optimal spacing based on available space and content
-  const roundSpacing = Math.max(minSpacing + minMatchWidth, availableWidth / (rounds.length + 1));
-  const maxMatchesInRound = Math.max(...rounds.map(r => r.length));
-  const matchSpacing = Math.max(minSpacing, availableHeight / (maxMatchesInRound + 1));
+  const roundSpacing = availableWidth / (rounds.length + 1);
 
   const positions = {};
 
-  // First round: evenly spaced vertically within available height
+  // First round: evenly spaced vertically
   const firstRound = rounds[0];
-  const firstRoundStartY = padding + (availableHeight - ((firstRound.length - 1) * matchSpacing)) / 2;
-  
-  firstRound.forEach((match, i) => {
-    positions[match.id] = {
-      x: padding,
-      y: Math.max(padding, firstRoundStartY + i * matchSpacing)
-    };
-  });
+  if (firstRound.length > 0) {
+    const firstRoundSpacing = Math.max(minMatchHeight + minSpacing, containerHeight / (firstRound.length + 1));
+    
+    firstRound.forEach((match, i) => {
+      positions[match.id] = {
+        x: padding,
+        y: padding + (i + 1) * firstRoundSpacing
+      };
+    });
+  }
 
-  // Subsequent rounds: center each match between its previous matches
+  // Subsequent rounds: center each match between its source matches
   for (let r = 1; r < rounds.length; r++) {
     rounds[r].forEach((match) => {
-      // Find previous match ids for winner
-      const prevIds = [];
-      Object.values(match.previousMatch || {}).forEach(id => {
-        if (id) prevIds.push(id);
-      });
+      // Extract previous match IDs from the data structure
+      const prevMatch1 = match.previousMatch?.wrestler1;
+      const prevMatch2 = match.previousMatch?.wrestler2;
       
-      // If previous matches found, center between them
-      if (prevIds.length) {
-        const prevYs = prevIds.map(pid => positions[pid]?.y).filter(Boolean);
-        const avgY = prevYs.length ? prevYs.reduce((a, b) => a + b, 0) / prevYs.length : padding;
+      if (prevMatch1 && prevMatch2 && positions[prevMatch1] && positions[prevMatch2]) {
+        // Position this match at the midpoint between its two source matches
+        const y1 = positions[prevMatch1].y;
+        const y2 = positions[prevMatch2].y;
+        const centerY = (y1 + y2) / 2;
+        
         positions[match.id] = {
           x: padding + r * roundSpacing,
-          y: avgY
+          y: centerY
         };
       } else {
-        // Fallback: stack vertically with proper spacing
+        // Fallback: space matches evenly in this round (shouldn't happen with proper data)
         const idx = rounds[r].indexOf(match);
-        const roundStartY = padding + (availableHeight - ((rounds[r].length - 1) * matchSpacing)) / 2;
+        const roundMatchSpacing = containerHeight / (rounds[r].length + 1);
         positions[match.id] = {
           x: padding + r * roundSpacing,
-          y: Math.max(padding, roundStartY + idx * matchSpacing)
+          y: padding + (idx + 1) * roundMatchSpacing
         };
       }
     });
@@ -76,8 +73,8 @@ const calculateResponsiveLayout = (rounds, options = {}) => {
   return {
     positions,
     dimensions: {
-      width: Math.max(400, maxX),
-      height: Math.max(300, maxY)
+      width: Math.max(600, maxX),
+      height: Math.max(400, maxY)
     },
     matchSize: {
       width: minMatchWidth,
@@ -96,32 +93,25 @@ const ChampionshipBracket = ({
   matches = [],
   onMatchClick 
 }) => {
-  // Build a lookup table for matches by ID
-  const matchLookup = {};
-  matches.forEach(m => { matchLookup[m.id] = m; });
-
-  // Build rounds by traversing previousMatch pointers
-  // Find first round matches (no previousMatch for winner)
-  const firstRound = matches.filter(m => !m.previousMatch || !m.previousMatch.winner);
+  // Build rounds based on the round field in the data
+  // This is simpler and more reliable than traversing match connections
   const rounds = [];
-  rounds.push(firstRound);
-
-  // Build subsequent rounds
-  let currentRound = firstRound;
-  while (currentRound.length > 0) {
-    const nextRound = [];
-    currentRound.forEach(match => {
-      // Find next match for winner
-      if (match.nextMatch && match.nextMatch.winner) {
-        const next = matchLookup[match.nextMatch.winner];
-        if (next && !nextRound.includes(next)) nextRound.push(next);
-      }
-      // Optionally, find next match for loser (for consolation)
-      // if (match.nextMatch && match.nextMatch.loser) { ... }
-    });
-    if (nextRound.length > 0) rounds.push(nextRound);
-    currentRound = nextRound;
-  }
+  
+  // Group matches by round number
+  const matchesByRound = {};
+  matches.forEach(match => {
+    const roundNum = match.round;
+    if (!matchesByRound[roundNum]) {
+      matchesByRound[roundNum] = [];
+    }
+    matchesByRound[roundNum].push(match);
+  });
+  
+  // Build rounds array in order
+  const roundNumbers = Object.keys(matchesByRound).map(Number).sort((a, b) => a - b);
+  roundNumbers.forEach(roundNum => {
+    rounds.push(matchesByRound[roundNum]);
+  });
 
   // Calculate responsive layout based on available space
   const layout = calculateResponsiveLayout(rounds);
