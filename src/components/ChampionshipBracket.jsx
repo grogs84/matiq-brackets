@@ -10,7 +10,6 @@ const calculateResponsiveLayout = (rounds, options = {}) => {
 
   // Default options with larger container for better initial layout
   const {
-    containerWidth = 1200,
     containerHeight = 800,
     padding = 60,
     minMatchWidth = 140,
@@ -18,9 +17,10 @@ const calculateResponsiveLayout = (rounds, options = {}) => {
     minSpacing = 20
   } = options;
 
-  // Calculate spacing between rounds
-  const availableWidth = containerWidth - (2 * padding);
-  const roundSpacing = availableWidth / (rounds.length + 1);
+  // Calculate spacing between rounds with more horizontal space
+  // Move first round closer to left and increase spacing between rounds
+  const leftMargin = 30; // Reduced from padding to move first round closer to left
+  const roundSpacing = 200; // Increased fixed spacing for more balanced feel
 
   const positions = {};
 
@@ -31,7 +31,7 @@ const calculateResponsiveLayout = (rounds, options = {}) => {
     
     firstRound.forEach((match, i) => {
       positions[match.id] = {
-        x: padding,
+        x: leftMargin,
         y: padding + (i + 1) * firstRoundSpacing
       };
     });
@@ -51,7 +51,7 @@ const calculateResponsiveLayout = (rounds, options = {}) => {
         const centerY = (y1 + y2) / 2;
         
         positions[match.id] = {
-          x: padding + r * roundSpacing,
+          x: leftMargin + r * roundSpacing,
           y: centerY
         };
       } else {
@@ -59,7 +59,7 @@ const calculateResponsiveLayout = (rounds, options = {}) => {
         const idx = rounds[r].indexOf(match);
         const roundMatchSpacing = containerHeight / (rounds[r].length + 1);
         positions[match.id] = {
-          x: padding + r * roundSpacing,
+          x: leftMargin + r * roundSpacing,
           y: padding + (idx + 1) * roundMatchSpacing
         };
       }
