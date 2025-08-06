@@ -1,24 +1,42 @@
 import React from 'react';
 
 /**
- * Calculate match position in tournament tree
- * @param {number} roundIndex - Index of the round (0 = first round)
- * @param {number} matchIndex - Index within that round
- * @param {number} totalRounds - Total number of rounds
- * @param {number} matchesInRound - Number of matches in this round
+ * Calculate responsive tournament tree dimensions and positions
+ * @param {Array} rounds - Array of round arrays containing matches
+ * @param {Object} options - Sizing options {containerWidth, containerHeight, padding}
  */
-// Calculate tree positions for all matches
-const calculateTreePositions = (rounds) => {
-  const roundSpacing = 180;
-  const matchSpacing = 60;
+const calculateResponsiveLayout = (rounds, options = {}) => {
+  if (rounds.length === 0) return { positions: {}, dimensions: { width: 400, height: 300 } };
+
+  // Default options with responsive considerations
+  const {
+    containerWidth = 900,
+    containerHeight = 700,
+    padding = 40,
+    minMatchWidth = 120,
+    minMatchHeight = 60,
+    minSpacing = 40
+  } = options;
+
+  // Calculate available space
+  const availableWidth = containerWidth - (2 * padding);
+  const availableHeight = containerHeight - (2 * padding);
+
+  // Calculate optimal spacing based on available space and content
+  const roundSpacing = Math.max(minSpacing + minMatchWidth, availableWidth / (rounds.length + 1));
+  const maxMatchesInRound = Math.max(...rounds.map(r => r.length));
+  const matchSpacing = Math.max(minSpacing, availableHeight / (maxMatchesInRound + 1));
+
   const positions = {};
 
-  // First round: evenly spaced vertically
+  // First round: evenly spaced vertically within available height
   const firstRound = rounds[0];
+  const firstRoundStartY = padding + (availableHeight - ((firstRound.length - 1) * matchSpacing)) / 2;
+  
   firstRound.forEach((match, i) => {
     positions[match.id] = {
-      x: 100,
-      y: 100 + i * matchSpacing
+      x: padding,
+      y: Math.max(padding, firstRoundStartY + i * matchSpacing)
     };
   });
 
@@ -30,29 +48,46 @@ const calculateTreePositions = (rounds) => {
       Object.values(match.previousMatch || {}).forEach(id => {
         if (id) prevIds.push(id);
       });
+      
       // If previous matches found, center between them
       if (prevIds.length) {
         const prevYs = prevIds.map(pid => positions[pid]?.y).filter(Boolean);
-        const avgY = prevYs.length ? prevYs.reduce((a, b) => a + b, 0) / prevYs.length : 100;
+        const avgY = prevYs.length ? prevYs.reduce((a, b) => a + b, 0) / prevYs.length : padding;
         positions[match.id] = {
-          x: 100 + r * roundSpacing,
+          x: padding + r * roundSpacing,
           y: avgY
         };
       } else {
-        // Fallback: stack vertically
+        // Fallback: stack vertically with proper spacing
         const idx = rounds[r].indexOf(match);
+        const roundStartY = padding + (availableHeight - ((rounds[r].length - 1) * matchSpacing)) / 2;
         positions[match.id] = {
-          x: 100 + r * roundSpacing,
-          y: 100 + idx * matchSpacing
+          x: padding + r * roundSpacing,
+          y: Math.max(padding, roundStartY + idx * matchSpacing)
         };
       }
     });
   }
-  return positions;
+
+  // Calculate final dimensions based on content
+  const maxX = Math.max(...Object.values(positions).map(p => p.x)) + minMatchWidth + padding;
+  const maxY = Math.max(...Object.values(positions).map(p => p.y)) + minMatchHeight + padding;
+  
+  return {
+    positions,
+    dimensions: {
+      width: Math.max(400, maxX),
+      height: Math.max(300, maxY)
+    },
+    matchSize: {
+      width: minMatchWidth,
+      height: minMatchHeight
+    }
+  };
 };
 
 /**
- * ChampionshipBracket - Renders championship bracket matches
+ * ChampionshipBracket - Renders responsive championship bracket matches
  * 
  * Expects matches with embedded participant data:
  * match.participants[0/1] = { id, name, seed, school, ... }
@@ -88,43 +123,68 @@ const ChampionshipBracket = ({
     currentRound = nextRound;
   }
 
-  // Calculate tree positions for all matches
-  const positions = calculateTreePositions(rounds);
+  // Calculate responsive layout based on available space
+  const layout = calculateResponsiveLayout(rounds);
+  const { positions, dimensions, matchSize } = layout;
 
   return (
-    <div className="championship-bracket">
+    <div className="championship-bracket w-full">
       <h3 className="text-lg font-bold mb-4">Championship Bracket</h3>
-      <svg width="900" height="700" className="border border-gray-300">
-        <text x="450" y="30" textAnchor="middle" className="text-lg font-bold">
-          Championship
-        </text>
-        {rounds.map((roundMatches) =>
-          roundMatches.map((match) => {
-            const pos = positions[match.id];
-            return (
-              <g key={match.id}>
-                <rect
-                  x={pos.x}
-                  y={pos.y}
-                  width="120"
-                  height="60"
-                  fill="white"
-                  stroke="black"
-                  strokeWidth="1"
-                  className={onMatchClick ? "cursor-pointer hover:fill-blue-50" : ""}
-                  onClick={() => onMatchClick?.(match)}
-                />
-                <text x={pos.x + 60} y={pos.y + 20} textAnchor="middle" className="text-xs">
-                  {match.participants[0]?.name || 'TBD'}
-                </text>
-                <text x={pos.x + 60} y={pos.y + 40} textAnchor="middle" className="text-xs">
-                  vs {match.participants[1]?.name || 'TBD'}
-                </text>
-              </g>
-            );
-          })
-        )}
-      </svg>
+      <div className="w-full overflow-x-auto">
+        <svg 
+          viewBox={`0 0 ${dimensions.width} ${dimensions.height}`}
+          preserveAspectRatio="xMidYMid meet"
+          className="w-full h-auto border border-gray-300 min-h-[400px] max-h-[80vh]"
+          style={{ aspectRatio: `${dimensions.width} / ${dimensions.height}` }}
+        >
+          <text 
+            x={dimensions.width / 2} 
+            y="30" 
+            textAnchor="middle" 
+            className="text-lg font-bold fill-current"
+          >
+            Championship
+          </text>
+          {rounds.map((roundMatches) =>
+            roundMatches.map((match) => {
+              const pos = positions[match.id];
+              if (!pos) return null;
+              
+              return (
+                <g key={match.id}>
+                  <rect
+                    x={pos.x}
+                    y={pos.y}
+                    width={matchSize.width}
+                    height={matchSize.height}
+                    fill="white"
+                    stroke="black"
+                    strokeWidth="1"
+                    className={onMatchClick ? "cursor-pointer hover:fill-blue-50" : ""}
+                    onClick={() => onMatchClick?.(match)}
+                  />
+                  <text 
+                    x={pos.x + matchSize.width / 2} 
+                    y={pos.y + matchSize.height / 3} 
+                    textAnchor="middle" 
+                    className="text-xs fill-current pointer-events-none"
+                  >
+                    {match.participants[0]?.name || 'TBD'}
+                  </text>
+                  <text 
+                    x={pos.x + matchSize.width / 2} 
+                    y={pos.y + (2 * matchSize.height) / 3} 
+                    textAnchor="middle" 
+                    className="text-xs fill-current pointer-events-none"
+                  >
+                    vs {match.participants[1]?.name || 'TBD'}
+                  </text>
+                </g>
+              );
+            })
+          )}
+        </svg>
+      </div>
     </div>
   );
 };

@@ -1,10 +1,7 @@
-import { useState } from 'react'
 import './App.css'
 import ChampionshipBracket from './components/ChampionshipBracket'
 
 function App() {
-  const [activeTab, setActiveTab] = useState('championship')
-
   // Sample championship bracket matches with embedded participant data
   const sampleMatches = [
     // Round 1 (32 wrestlers, 16 matches)
