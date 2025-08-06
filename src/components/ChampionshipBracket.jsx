@@ -135,6 +135,45 @@ const buildRoundsFromTree = (matches) => {
 };
 
 /**
+ * Calculate connecting lines between tournament matches
+ * @param {Array} matches - All matches in the tournament
+ * @param {Object} positions - Match position coordinates
+ * @param {Object} matchSize - Match box dimensions
+ * @returns {Array} Array of line objects with start/end coordinates
+ */
+const calculateConnectingLines = (matches, positions, matchSize) => {
+  const lines = [];
+  const matchMap = {};
+  
+  // Create match lookup
+  matches.forEach(match => {
+    matchMap[match.id] = match;
+  });
+  
+  // For each match, create line to its next match (if exists)
+  matches.forEach(match => {
+    const nextMatchId = match.winner_next_match_id;
+    if (nextMatchId && positions[match.id] && positions[nextMatchId]) {
+      const sourcePos = positions[match.id];
+      const targetPos = positions[nextMatchId];
+      
+      // Line from right edge center of source to left edge center of target
+      const line = {
+        id: `line-${match.id}-to-${nextMatchId}`,
+        x1: sourcePos.x + matchSize.width, // Right edge of source match
+        y1: sourcePos.y + matchSize.height / 2, // Center height of source match
+        x2: targetPos.x, // Left edge of target match
+        y2: targetPos.y + matchSize.height / 2, // Center height of target match
+      };
+      
+      lines.push(line);
+    }
+  });
+  
+  return lines;
+};
+
+/**
  * ChampionshipBracket - Renders responsive championship bracket matches
  * 
  * Expects matches with embedded participant data:
@@ -150,6 +189,9 @@ const ChampionshipBracket = ({
   // Calculate responsive layout based on available space
   const layout = calculateResponsiveLayout(rounds);
   const { positions, dimensions, matchSize } = layout;
+
+  // Calculate connecting lines between matches
+  const connectingLines = calculateConnectingLines(matches, positions, matchSize);
 
   return (
     <div className="championship-bracket w-full">
@@ -169,6 +211,22 @@ const ChampionshipBracket = ({
           >
             Championship
           </text>
+          
+          {/* Connecting lines - drawn first so they appear behind matches */}
+          {connectingLines.map((line) => (
+            <line
+              key={line.id}
+              x1={line.x1}
+              y1={line.y1}
+              x2={line.x2}
+              y2={line.y2}
+              stroke="#d1d5db"
+              strokeWidth="2"
+              className="opacity-60"
+            />
+          ))}
+          
+          {/* Match boxes - drawn on top of lines */}
           {rounds.map((roundMatches) =>
             roundMatches.map((match) => {
               const pos = positions[match.id];
