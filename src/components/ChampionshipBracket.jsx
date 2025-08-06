@@ -10,7 +10,7 @@ const calculateResponsiveLayout = (rounds, options = {}) => {
 
   // Default options with larger container for better initial layout
   const {
-    containerHeight = 800,
+    containerHeight = 1200, // Increased from 800 to give more vertical space
     padding = 60,
     minMatchWidth = 140,
     minMatchHeight = 70,
@@ -68,7 +68,7 @@ const calculateResponsiveLayout = (rounds, options = {}) => {
 
   // Calculate final dimensions based on content
   const maxX = Math.max(...Object.values(positions).map(p => p.x)) + minMatchWidth + padding;
-  const maxY = Math.max(...Object.values(positions).map(p => p.y)) + minMatchHeight + padding;
+  const maxY = Math.max(...Object.values(positions).map(p => p.y)) + minMatchHeight + padding + 40; // Added extra 40px bottom padding
   
   return {
     positions,
@@ -120,12 +120,12 @@ const ChampionshipBracket = ({
   return (
     <div className="championship-bracket w-full">
       <h3 className="text-lg font-bold mb-4">Championship Bracket</h3>
-      <div className="w-full overflow-x-auto">
+      <div className="w-full overflow-x-auto overflow-y-auto max-h-[calc(100vh-200px)]">
         <svg 
           viewBox={`0 0 ${dimensions.width} ${dimensions.height}`}
-          preserveAspectRatio="xMidYMid meet"
-          className="w-full h-auto border border-gray-300 min-h-[400px] max-h-[80vh]"
-          style={{ aspectRatio: `${dimensions.width} / ${dimensions.height}` }}
+          preserveAspectRatio="xMinYMin meet"
+          className="w-full border border-gray-300"
+          style={{ height: `${dimensions.height}px`, minHeight: '400px' }}
         >
           <text 
             x={dimensions.width / 2} 
