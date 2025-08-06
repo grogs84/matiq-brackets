@@ -40,9 +40,9 @@ const calculateResponsiveLayout = (rounds, options = {}) => {
   // Subsequent rounds: center each match between its source matches
   for (let r = 1; r < rounds.length; r++) {
     rounds[r].forEach((match) => {
-      // Extract previous match IDs from the data structure
-      const prevMatch1 = match.previousMatch?.wrestler1;
-      const prevMatch2 = match.previousMatch?.wrestler2;
+      // Extract previous match IDs from the flat database structure
+      const prevMatch1 = match.winner_prev_match_id;
+      const prevMatch2 = match.loser_prev_match_id;
       
       if (prevMatch1 && prevMatch2 && positions[prevMatch1] && positions[prevMatch2]) {
         // Position this match at the midpoint between its two source matches
@@ -84,8 +84,8 @@ const calculateResponsiveLayout = (rounds, options = {}) => {
 };
 
 /**
- * Build rounds based on tournament tree structure (database agnostic)
- * Uses previousMatch/nextMatch pointers instead of custom round fields
+ * Build championship bracket rounds using flat match structure
+ * Works with database format using winner_next_match_id pointers
  */
 const buildRoundsFromTree = (matches) => {
   const rounds = [];
@@ -96,36 +96,38 @@ const buildRoundsFromTree = (matches) => {
     matchMap[match.id] = match;
   });
   
-  // Find first round (matches with no previousMatch or previousMatch.winner === null)
+  // Find first round: matches with no winner_prev_match_id
   const firstRound = matches.filter(match => 
-    !match.previousMatch || match.previousMatch.winner === null
+    !match.winner_prev_match_id && !match.loser_prev_match_id
   );
   
-  if (firstRound.length > 0) {
-    rounds.push(firstRound);
+  if (firstRound.length === 0) return rounds;
+  
+  rounds.push(firstRound);
+  
+  // Build subsequent rounds by following winner_next_match_id pointers
+  let currentRound = firstRound;
+  
+  while (currentRound.length > 1) {
+    const nextRound = [];
+    const processedMatches = new Set();
     
-    // Build subsequent rounds by following nextMatch pointers
-    let currentRound = firstRound;
-    while (currentRound.length > 1) {
-      const nextRound = [];
-      const nextMatchIds = new Set();
-      
-      currentRound.forEach(match => {
-        if (match.nextMatch?.winner && !nextMatchIds.has(match.nextMatch.winner)) {
-          const nextMatch = matchMap[match.nextMatch.winner];
-          if (nextMatch) {
-            nextRound.push(nextMatch);
-            nextMatchIds.add(match.nextMatch.winner);
-          }
+    currentRound.forEach(match => {
+      const nextMatchId = match.winner_next_match_id;
+      if (nextMatchId && !processedMatches.has(nextMatchId)) {
+        const nextMatch = matchMap[nextMatchId];
+        if (nextMatch) {
+          nextRound.push(nextMatch);
+          processedMatches.add(nextMatchId);
         }
-      });
-      
-      if (nextRound.length > 0) {
-        rounds.push(nextRound);
-        currentRound = nextRound;
-      } else {
-        break;
       }
+    });
+    
+    if (nextRound.length > 0) {
+      rounds.push(nextRound);
+      currentRound = nextRound;
+    } else {
+      break; // Reached final
     }
   }
   
