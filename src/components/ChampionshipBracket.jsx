@@ -7,15 +7,48 @@ import React from 'react';
  * @param {number} totalRounds - Total number of rounds
  * @param {number} matchesInRound - Number of matches in this round
  */
-const calculateMatchPosition = (roundIndex, matchIndex, totalRounds, matchesInRound) => {
-  const roundSpacing = 150; // Horizontal spacing between rounds
-  const matchSpacing = 80;  // Vertical spacing between matches
-  const x = 100 + roundIndex * roundSpacing;
-  // Center matches vertically for each round
-  const totalHeight = (matchesInRound - 1) * matchSpacing;
-  const startY = 200 - (totalHeight / 2); // Center around y=200
-  const y = startY + (matchIndex * matchSpacing);
-  return { x, y };
+// Calculate tree positions for all matches
+const calculateTreePositions = (rounds) => {
+  const roundSpacing = 180;
+  const matchSpacing = 60;
+  const positions = {};
+
+  // First round: evenly spaced vertically
+  const firstRound = rounds[0];
+  firstRound.forEach((match, i) => {
+    positions[match.id] = {
+      x: 100,
+      y: 100 + i * matchSpacing
+    };
+  });
+
+  // Subsequent rounds: center each match between its previous matches
+  for (let r = 1; r < rounds.length; r++) {
+    rounds[r].forEach((match) => {
+      // Find previous match ids for winner
+      const prevIds = [];
+      Object.values(match.previousMatch || {}).forEach(id => {
+        if (id) prevIds.push(id);
+      });
+      // If previous matches found, center between them
+      if (prevIds.length) {
+        const prevYs = prevIds.map(pid => positions[pid]?.y).filter(Boolean);
+        const avgY = prevYs.length ? prevYs.reduce((a, b) => a + b, 0) / prevYs.length : 100;
+        positions[match.id] = {
+          x: 100 + r * roundSpacing,
+          y: avgY
+        };
+      } else {
+        // Fallback: stack vertically
+        const idx = rounds[r].indexOf(match);
+        positions[match.id] = {
+          x: 100 + r * roundSpacing,
+          y: 100 + idx * matchSpacing
+        };
+      }
+    });
+  }
+  return positions;
 };
 
 /**
@@ -55,42 +88,42 @@ const ChampionshipBracket = ({
     currentRound = nextRound;
   }
 
-  const totalRounds = rounds.length;
+  // Calculate tree positions for all matches
+  const positions = calculateTreePositions(rounds);
 
   return (
     <div className="championship-bracket">
       <h3 className="text-lg font-bold mb-4">Championship Bracket</h3>
-      <svg width="800" height="600" className="border border-gray-300">
-        <text x="400" y="30" textAnchor="middle" className="text-lg font-bold">
+      <svg width="900" height="700" className="border border-gray-300">
+        <text x="450" y="30" textAnchor="middle" className="text-lg font-bold">
           Championship
         </text>
-        {rounds.map((roundMatches, roundIndex) => {
-          const matchesInRound = roundMatches.length;
-          return roundMatches.map((match, matchIndex) => {
-            const position = calculateMatchPosition(roundIndex, matchIndex, totalRounds, matchesInRound);
+        {rounds.map((roundMatches) =>
+          roundMatches.map((match) => {
+            const pos = positions[match.id];
             return (
               <g key={match.id}>
-                <rect 
-                  x={position.x} 
-                  y={position.y} 
-                  width="120" 
-                  height="60" 
-                  fill="white" 
-                  stroke="black" 
+                <rect
+                  x={pos.x}
+                  y={pos.y}
+                  width="120"
+                  height="60"
+                  fill="white"
+                  stroke="black"
                   strokeWidth="1"
                   className={onMatchClick ? "cursor-pointer hover:fill-blue-50" : ""}
                   onClick={() => onMatchClick?.(match)}
                 />
-                <text x={position.x + 60} y={position.y + 20} textAnchor="middle" className="text-xs">
+                <text x={pos.x + 60} y={pos.y + 20} textAnchor="middle" className="text-xs">
                   {match.participants[0]?.name || 'TBD'}
                 </text>
-                <text x={position.x + 60} y={position.y + 40} textAnchor="middle" className="text-xs">
+                <text x={pos.x + 60} y={pos.y + 40} textAnchor="middle" className="text-xs">
                   vs {match.participants[1]?.name || 'TBD'}
                 </text>
               </g>
             );
-          });
-        })}
+          })
+        )}
       </svg>
     </div>
   );
