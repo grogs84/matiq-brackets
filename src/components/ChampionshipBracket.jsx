@@ -135,7 +135,7 @@ const buildRoundsFromTree = (matches) => {
 };
 
 /**
- * Calculate connecting lines between tournament matches
+ * Calculate connecting lines between tournament matches using bracket-style box pattern
  * @param {Array} matches - All matches in the tournament
  * @param {Object} positions - Match position coordinates
  * @param {Object} matchSize - Match box dimensions
@@ -150,23 +150,86 @@ const calculateConnectingLines = (matches, positions, matchSize) => {
     matchMap[match.id] = match;
   });
   
-  // For each match, create line to its next match (if exists)
+  // Group matches by their winner_next_match_id to find pairs that feed into the same target
+  const targetGroups = {};
   matches.forEach(match => {
     const nextMatchId = match.winner_next_match_id;
-    if (nextMatchId && positions[match.id] && positions[nextMatchId]) {
-      const sourcePos = positions[match.id];
-      const targetPos = positions[nextMatchId];
+    if (nextMatchId) {
+      if (!targetGroups[nextMatchId]) {
+        targetGroups[nextMatchId] = [];
+      }
+      targetGroups[nextMatchId].push(match);
+    }
+  });
+  
+  // For each target match, create box-pattern lines from its source matches
+  Object.entries(targetGroups).forEach(([targetMatchId, sourceMatches]) => {
+    if (sourceMatches.length === 2 && positions[targetMatchId]) {
+      const [match1, match2] = sourceMatches;
+      const pos1 = positions[match1.id];
+      const pos2 = positions[match2.id];
+      const targetPos = positions[targetMatchId];
       
-      // Line from right edge center of source to left edge center of target
-      const line = {
-        id: `line-${match.id}-to-${nextMatchId}`,
-        x1: sourcePos.x + matchSize.width, // Right edge of source match
-        y1: sourcePos.y + matchSize.height / 2, // Center height of source match
-        x2: targetPos.x, // Left edge of target match
-        y2: targetPos.y + matchSize.height / 2, // Center height of target match
-      };
-      
-      lines.push(line);
+      if (pos1 && pos2) {
+        // Calculate horizontal extension distance (typically 1/3 of the gap between rounds)
+        const gapBetweenRounds = targetPos.x - Math.max(pos1.x, pos2.x) - matchSize.width;
+        const horizontalExtension = Math.max(20, gapBetweenRounds * 0.4); // At least 20px, typically 40% of gap
+        
+        // Right edge centers of source matches
+        const match1RightX = pos1.x + matchSize.width;
+        const match1CenterY = pos1.y + matchSize.height / 2;
+        const match2RightX = pos2.x + matchSize.width;
+        const match2CenterY = pos2.y + matchSize.height / 2;
+        
+        // Target match left edge center
+        const targetLeftX = targetPos.x;
+        const targetCenterY = targetPos.y + matchSize.height / 2;
+        
+        // Horizontal extension endpoints
+        const extension1X = match1RightX + horizontalExtension;
+        const extension2X = match2RightX + horizontalExtension;
+        
+        // Vertical connector X position (at the extension point)
+        const connectorX = Math.max(extension1X, extension2X);
+        
+        // Create the box pattern lines:
+        
+        // 1. Horizontal line from match1 right edge
+        lines.push({
+          id: `line-${match1.id}-horizontal`,
+          x1: match1RightX,
+          y1: match1CenterY,
+          x2: connectorX,
+          y2: match1CenterY
+        });
+        
+        // 2. Horizontal line from match2 right edge
+        lines.push({
+          id: `line-${match2.id}-horizontal`,
+          x1: match2RightX,
+          y1: match2CenterY,
+          x2: connectorX,
+          y2: match2CenterY
+        });
+        
+        // 3. Vertical line connecting the horizontal extensions
+        lines.push({
+          id: `line-${match1.id}-${match2.id}-vertical`,
+          x1: connectorX,
+          y1: Math.min(match1CenterY, match2CenterY),
+          x2: connectorX,
+          y2: Math.max(match1CenterY, match2CenterY)
+        });
+        
+        // 4. Final horizontal line from vertical connector to target match
+        lines.push({
+          id: `line-connector-to-${targetMatchId}`,
+          x1: connectorX,
+          y1: targetCenterY,
+          x2: targetLeftX,
+          y2: targetCenterY
+        });
+      }
     }
   });
   
