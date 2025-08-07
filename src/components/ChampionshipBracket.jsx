@@ -304,18 +304,35 @@ const ChampionshipBracket = ({
   // Calculate connecting lines between matches
   const connectingLines = calculateConnectingLines(matches, positions, matchSize);
 
+  // Recalculate dimensions to include connecting lines
+  const allXCoords = [
+    ...Object.values(positions).map(p => p.x),
+    ...Object.values(positions).map(p => p.x + matchSize.width),
+    ...connectingLines.flatMap(line => [line.x1, line.x2])
+  ];
+  const allYCoords = [
+    ...Object.values(positions).map(p => p.y),
+    ...Object.values(positions).map(p => p.y + matchSize.height),
+    ...connectingLines.flatMap(line => [line.y1, line.y2])
+  ];
+
+  const finalDimensions = {
+    width: Math.max(dimensions.width, Math.max(...allXCoords) + BRACKET_CONSTANTS.DEFAULT_PADDING),
+    height: Math.max(dimensions.height, Math.max(...allYCoords) + BRACKET_CONSTANTS.BOTTOM_PADDING_EXTRA)
+  };
+
   return (
     <div className="championship-bracket w-full">
       <h3 className="text-lg font-bold mb-4">Championship Bracket</h3>
       <div className="w-full overflow-x-auto overflow-y-auto max-h-[calc(100vh-200px)]">
         <svg 
-          viewBox={`0 0 ${dimensions.width} ${dimensions.height}`}
+          viewBox={`0 0 ${finalDimensions.width} ${finalDimensions.height}`}
           preserveAspectRatio="xMinYMin meet"
           className="w-full border border-gray-300"
-          style={{ height: `${dimensions.height}px`, minHeight: '400px' }}
+          style={{ height: `${finalDimensions.height}px`, minHeight: '400px' }}
         >
           <text 
-            x={dimensions.width / 2} 
+            x={finalDimensions.width / 2} 
             y="30" 
             textAnchor="middle" 
             className="text-lg font-bold fill-current"
