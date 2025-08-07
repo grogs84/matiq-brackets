@@ -16,7 +16,6 @@ The project follows **incremental development** with a focus on building reusabl
 - **Enhanced Match Cards**: Wrestler names, seeds, schools, and winner-based scoring display
 - **Responsive SVG Layout**: Tournament tree positioning with proper spacing algorithms
 - **Embedded Data Approach**: Components expect complete participant data (no external references)
-- **Storybook Integration**: Component development and testing environment
 - **Tournament Tree Algorithm**: Handles 8, 16, and 32-wrestler championship brackets
 
 ## Technical Stack
@@ -25,7 +24,6 @@ The project follows **incremental development** with a focus on building reusabl
 - **Styling**: Tailwind CSS utility-first approach
 - **Rendering**: SVG-based bracket visualization with mathematical positioning
 - **Data**: Database-agnostic flat structure (works with PostgreSQL/Neo4j)
-- **Development**: Storybook 8.3.0 for component showcase and testing
 - **Component Library**: Clean exports/imports following modern React patterns
 
 ## Screenshots
@@ -88,13 +86,12 @@ Penn State
    npm run dev
    ```
 
-3. Start Storybook for component development:
+2. Start the development server:
    ```bash
-   npm run storybook
+   npm run dev
    ```
 
-4. Open [http://localhost:5174](http://localhost:5174) to view the application
-5. Open [http://localhost:6006](http://localhost:6006) to view Storybook
+3. Open [http://localhost:5174](http://localhost:5174) to view the application
 
 ### Available Scripts
 
@@ -102,11 +99,10 @@ Penn State
 - `npm run build` - Build for production
 - `npm run preview` - Preview production build
 - `npm run lint` - Run ESLint
-- `npm run storybook` - Start Storybook development server
 
 ### Component Development
 
-The project uses **Storybook** for component development and testing:
+The ChampionshipBracket component follows **pure component** design principles:
 
 ```javascript
 // ChampionshipBracket usage
@@ -158,7 +154,6 @@ const match = {
 ✅ **Tournament Tree Algorithm**: Database-agnostic flat structure traversal  
 ✅ **"Box Pattern" Connecting Lines**: Multi-segment lines following wrestling conventions  
 ✅ **Enhanced Match Cards**: Seeds, schools, winner-based scoring, responsive text positioning  
-✅ **Storybook Integration**: Component development environment with multiple tournament sizes  
 ✅ **Utility Functions**: DRY principles, documented constants, NaN validation  
 ✅ **Responsive Layout**: Tournament positioning algorithm with proper spacing  
 🔄 **Consolation Bracket Component**: Planning phase - complex wrestling flow patterns  
@@ -222,7 +217,7 @@ match.participant_ids = ["w1", "w2"]
 ### Incremental Development
 - Build and test one component at a time, hands-on approach
 - Each feature works completely before moving to next
-- Storybook enables isolated component development
+- Isolated component development in main application
 
 ### Pure Components
 - No side effects, easy to test, clear prop interfaces
@@ -240,14 +235,9 @@ match.participant_ids = ["w1", "w2"]
 ```
 src/
 ├── components/
-│   ├── ChampionshipBracket.jsx      # ✅ Complete championship bracket component
-│   └── ChampionshipBracket.stories.js # ✅ Storybook stories (8, 16, 32 wrestler scenarios)
+│   └── ChampionshipBracket.jsx      # ✅ Complete championship bracket component
 ├── App.jsx                          # ✅ Test harness with sample tournament data
 └── main.jsx
-
-.storybook/
-├── main.ts                          # ✅ Storybook configuration with React-Vite integration
-└── preview.ts                       # ✅ Global settings and Tailwind CSS setup
 
 brackets/                            # 📋 Reference materials
 ├── NCAA2012.pdf                     # Actual NCAA bracket PDFs for accuracy
@@ -267,4 +257,3 @@ brackets/                            # 📋 Reference materials
 - `COMPONENT_DESIGN.md`: Detailed component architecture and API design
 - `ROADMAP.md`: Development phases and progress tracking
 - `/brackets/*.pdf`: Actual NCAA bracket PDFs for visual accuracy
-- Storybook: [http://localhost:6006](http://localhost:6006) for component showcase
