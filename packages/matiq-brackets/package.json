@@ -1,0 +1,72 @@
+{
+  "name": "matiq-brackets",
+  "version": "1.0.0",
+  "description": "Reusable wrestling bracket visualization components for React",
+  "main": "src/index.ts",
+  "module": "src/index.ts",
+  "types": "src/index.ts",
+  "exports": {
+    ".": {
+      "import": "./src/index.ts",
+      "require": "./src/index.ts",
+      "types": "./src/index.ts"
+    },
+    "./championship": {
+      "import": "./src/championship/ChampionshipBracket.tsx",
+      "require": "./src/championship/ChampionshipBracket.tsx",
+      "types": "./src/championship/ChampionshipBracket.tsx"
+    },
+    "./consolation": {
+      "import": "./src/consolation/ConsolationBracket.tsx",
+      "require": "./src/consolation/ConsolationBracket.tsx",
+      "types": "./src/consolation/ConsolationBracket.tsx"
+    },
+    "./pigtail": {
+      "import": "./src/pigtail/PigtailBracket.tsx",
+      "require": "./src/pigtail/PigtailBracket.tsx",
+      "types": "./src/pigtail/PigtailBracket.tsx"
+    },
+    "./types": {
+      "import": "./src/types.ts",
+      "require": "./src/types.ts",
+      "types": "./src/types.ts"
+    },
+    "./utils": {
+      "import": "./src/utils/index.ts",
+      "require": "./src/utils/index.ts",
+      "types": "./src/utils/index.ts"
+    }
+  },
+  "files": [
+    "src/**/*"
+  ],
+  "keywords": [
+    "wrestling",
+    "bracket",
+    "tournament",
+    "visualization",
+    "react",
+    "sports",
+    "championship",
+    "consolation",
+    "pigtail"
+  ],
+  "peerDependencies": {
+    "react": "^18.0.0 || ^19.0.0",
+    "react-dom": "^18.0.0 || ^19.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.1.8",
+    "@types/react-dom": "^19.1.6"
+  },
+  "author": "matiq-brackets team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/grogs84/matiq-brackets.git",
+    "directory": "packages/matiq-brackets"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
