@@ -66,7 +66,7 @@ function App() {
       </header>
 
       <main className="container mx-auto px-4 py-8">
-        <div className="bg-white rounded-lg shadow-lg p-6 max-h-[calc(100vh-200px)] overflow-hidden">
+        <div className="bg-white rounded-lg shadow-lg p-6 max-h-[calc(150vh-200px)]">
           <ChampionshipBracket 
             matches={sampleMatches}
             onMatchClick={handleMatchClick}
