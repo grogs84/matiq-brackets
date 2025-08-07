@@ -28,42 +28,59 @@ const getMatchRightEdgeCenter = (position, matchSize) => ({
  * Calculate text positions for match participants with enhanced layout for scores, seeds, and schools
  * @param {Object} position - Match position {x, y}
  * @param {Object} matchSize - Match dimensions {width, height}
- * @returns {Object} Text positions for participant1, participant2, and score
+ * @returns {Object} Text positions for participant1, participant2 with seeds inline and winner-based scoring
  */
 const getMatchTextPositions = (position, matchSize) => ({
   participant1: {
-    name: {
-      x: position.x + 8, // Left-aligned name
-      y: position.y + matchSize.height * 0.28
-    },
-    seed: {
-      x: position.x + matchSize.width - 8, // Right-aligned seed
+    seedAndName: {
+      x: position.x + 8, // Left-aligned seed and name
       y: position.y + matchSize.height * 0.28
     },
     school: {
       x: position.x + 8, // Left-aligned school
       y: position.y + matchSize.height * 0.42
+    },
+    score: {
+      x: position.x + matchSize.width - 8, // Right-aligned score (only for winner)
+      y: position.y + matchSize.height * 0.28
     }
   },
   participant2: {
-    name: {
-      x: position.x + 8, // Left-aligned name
-      y: position.y + matchSize.height * 0.68
-    },
-    seed: {
-      x: position.x + matchSize.width - 8, // Right-aligned seed
+    seedAndName: {
+      x: position.x + 8, // Left-aligned seed and name
       y: position.y + matchSize.height * 0.68
     },
     school: {
       x: position.x + 8, // Left-aligned school
       y: position.y + matchSize.height * 0.82
+    },
+    score: {
+      x: position.x + matchSize.width - 8, // Right-aligned score (only for winner)
+      y: position.y + matchSize.height * 0.68
     }
-  },
-  score: {
-    x: position.x + matchSize.width / 2, // Centered score
-    y: position.y + matchSize.height * 0.95
   }
 });
+
+/**
+ * Format participant display name with seed prefix
+ * @param {Object} participant - Participant object with name and seed
+ * @returns {string} Formatted name with seed prefix (e.g., "[1] Matt McDonough")
+ */
+const formatParticipantName = (participant) => {
+  if (!participant) return 'TBD';
+  const seed = participant.seed ? `[${participant.seed}] ` : '';
+  return `${seed}${participant.name || 'TBD'}`;
+};
+
+/**
+ * Determine if participant is the winner of the match
+ * @param {Object} match - Match object with winner field
+ * @param {Object} participant - Participant to check
+ * @returns {boolean} True if participant is the winner
+ */
+const isWinner = (match, participant) => {
+  return match.winner && participant && match.winner === participant.name;
+};
 
 /**
  * Wrestling bracket layout constants
@@ -416,25 +433,14 @@ const ChampionshipBracket = ({
                   
                   {/* Participant 1 */}
                   <text 
-                    x={textPositions.participant1.name.x} 
-                    y={textPositions.participant1.name.y} 
+                    x={textPositions.participant1.seedAndName.x} 
+                    y={textPositions.participant1.seedAndName.y} 
                     textAnchor="start" 
                     className="text-sm font-semibold fill-current pointer-events-none"
                     style={{ dominantBaseline: 'middle' }}
                   >
-                    {match.participants[0]?.name || 'TBD'}
+                    {formatParticipantName(match.participants[0])}
                   </text>
-                  {match.participants[0]?.seed && (
-                    <text 
-                      x={textPositions.participant1.seed.x} 
-                      y={textPositions.participant1.seed.y} 
-                      textAnchor="end" 
-                      className="text-sm font-bold fill-blue-600 pointer-events-none"
-                      style={{ dominantBaseline: 'middle' }}
-                    >
-                      {match.participants[0].seed}
-                    </text>
-                  )}
                   <text 
                     x={textPositions.participant1.school.x} 
                     y={textPositions.participant1.school.y} 
@@ -444,28 +450,28 @@ const ChampionshipBracket = ({
                   >
                     {match.participants[0]?.school || ''}
                   </text>
+                  {isWinner(match, match.participants[0]) && match.score && (
+                    <text 
+                      x={textPositions.participant1.score.x} 
+                      y={textPositions.participant1.score.y} 
+                      textAnchor="end" 
+                      className="text-xs font-medium text-green-700 fill-current pointer-events-none"
+                      style={{ dominantBaseline: 'middle' }}
+                    >
+                      {match.score}
+                    </text>
+                  )}
                   
                   {/* Participant 2 */}
                   <text 
-                    x={textPositions.participant2.name.x} 
-                    y={textPositions.participant2.name.y} 
+                    x={textPositions.participant2.seedAndName.x} 
+                    y={textPositions.participant2.seedAndName.y} 
                     textAnchor="start" 
                     className="text-sm font-semibold fill-current pointer-events-none"
                     style={{ dominantBaseline: 'middle' }}
                   >
-                    {match.participants[1]?.name || 'TBD'}
+                    {formatParticipantName(match.participants[1])}
                   </text>
-                  {match.participants[1]?.seed && (
-                    <text 
-                      x={textPositions.participant2.seed.x} 
-                      y={textPositions.participant2.seed.y} 
-                      textAnchor="end" 
-                      className="text-sm font-bold fill-blue-600 pointer-events-none"
-                      style={{ dominantBaseline: 'middle' }}
-                    >
-                      {match.participants[1].seed}
-                    </text>
-                  )}
                   <text 
                     x={textPositions.participant2.school.x} 
                     y={textPositions.participant2.school.y} 
@@ -475,13 +481,11 @@ const ChampionshipBracket = ({
                   >
                     {match.participants[1]?.school || ''}
                   </text>
-                  
-                  {/* Match Score */}
-                  {match.score && (
+                  {isWinner(match, match.participants[1]) && match.score && (
                     <text 
-                      x={textPositions.score.x} 
-                      y={textPositions.score.y} 
-                      textAnchor="middle" 
+                      x={textPositions.participant2.score.x} 
+                      y={textPositions.participant2.score.y} 
+                      textAnchor="end" 
                       className="text-xs font-medium text-green-700 fill-current pointer-events-none"
                       style={{ dominantBaseline: 'middle' }}
                     >
