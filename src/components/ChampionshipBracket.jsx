@@ -25,7 +25,7 @@ const getMatchRightEdgeCenter = (position, matchSize) => ({
 });
 
 /**
- * Calculate text positions for match participants
+ * Calculate text positions for match participants with improved typography
  * @param {Object} position - Match position {x, y}
  * @param {Object} matchSize - Match dimensions {width, height}
  * @returns {Object} Text positions for participant1 and participant2
@@ -33,11 +33,11 @@ const getMatchRightEdgeCenter = (position, matchSize) => ({
 const getMatchTextPositions = (position, matchSize) => ({
   participant1: {
     x: position.x + matchSize.width / 2,
-    y: position.y + matchSize.height / 3
+    y: position.y + matchSize.height * 0.35  // Better vertical positioning
   },
   participant2: {
     x: position.x + matchSize.width / 2,
-    y: position.y + (2 * matchSize.height) / 3
+    y: position.y + matchSize.height * 0.65  // Better vertical positioning
   }
 });
 
@@ -47,11 +47,11 @@ const getMatchTextPositions = (position, matchSize) => ({
 const BRACKET_CONSTANTS = {
   DEFAULT_CONTAINER_HEIGHT: 1200,
   DEFAULT_PADDING: 60,
-  MIN_MATCH_WIDTH: 140,
-  MIN_MATCH_HEIGHT: 70,
-  MIN_SPACING: 20,
+  MIN_MATCH_WIDTH: 180,  // Increased from 140 for better readability
+  MIN_MATCH_HEIGHT: 90,  // Increased from 70 for better readability
+  MIN_SPACING: 40,       // Doubled from 20 for more comfortable spacing
   LEFT_MARGIN: 30,
-  ROUND_SPACING: 200,
+  ROUND_SPACING: 220,    // Slightly increased to accommodate larger boxes
   BOTTOM_PADDING_EXTRA: 40,
   MIN_HORIZONTAL_EXTENSION: 20,
   HORIZONTAL_EXTENSION_RATIO: 0.4,
@@ -371,15 +371,18 @@ const ChampionshipBracket = ({
                     height={matchSize.height}
                     fill="white"
                     stroke="black"
-                    strokeWidth="1"
-                    className={onMatchClick ? "cursor-pointer hover:fill-blue-50" : ""}
+                    strokeWidth="1.5"
+                    rx="3"
+                    ry="3"
+                    className={onMatchClick ? "cursor-pointer hover:fill-blue-50 hover:stroke-blue-400" : ""}
                     onClick={() => onMatchClick?.(match)}
                   />
                   <text 
                     x={textPositions.participant1.x} 
                     y={textPositions.participant1.y} 
                     textAnchor="middle" 
-                    className="text-xs fill-current pointer-events-none"
+                    className="text-sm font-medium fill-current pointer-events-none"
+                    style={{ dominantBaseline: 'middle' }}
                   >
                     {match.participants[0]?.name || 'TBD'}
                   </text>
@@ -387,9 +390,10 @@ const ChampionshipBracket = ({
                     x={textPositions.participant2.x} 
                     y={textPositions.participant2.y} 
                     textAnchor="middle" 
-                    className="text-xs fill-current pointer-events-none"
+                    className="text-sm font-medium fill-current pointer-events-none"
+                    style={{ dominantBaseline: 'middle' }}
                   >
-                    vs {match.participants[1]?.name || 'TBD'}
+                    {match.participants[1]?.name || 'TBD'}
                   </text>
                 </g>
               );
