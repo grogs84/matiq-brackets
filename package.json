@@ -1,11 +1,12 @@
 {
-  "name": "matiq-brackets-monorepo",
-  "private": true,
-  "version": "0.0.0",
+  "name": "matiq-brackets",
+  "version": "1.0.0",
   "type": "module",
-  "workspaces": [
-    "packages/*"
-  ],
+  "main": "./src/index.jsx",
+  "exports": {
+    ".": "./src/index.jsx",
+    "./components/*": "./src/components/*.jsx"
+  },
   "scripts": {
     "dev": "vite",
     "build": "vite build",
@@ -13,7 +14,6 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "matiq-brackets": "workspace:*",
     "react": "^19.1.0",
     "react-dom": "^19.1.0"
   },
