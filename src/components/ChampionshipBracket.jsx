@@ -25,19 +25,43 @@ const getMatchRightEdgeCenter = (position, matchSize) => ({
 });
 
 /**
- * Calculate text positions for match participants with improved typography
+ * Calculate text positions for match participants with enhanced layout for scores, seeds, and schools
  * @param {Object} position - Match position {x, y}
  * @param {Object} matchSize - Match dimensions {width, height}
- * @returns {Object} Text positions for participant1 and participant2
+ * @returns {Object} Text positions for participant1, participant2, and score
  */
 const getMatchTextPositions = (position, matchSize) => ({
   participant1: {
-    x: position.x + matchSize.width / 2,
-    y: position.y + matchSize.height * 0.35  // Better vertical positioning
+    name: {
+      x: position.x + 8, // Left-aligned name
+      y: position.y + matchSize.height * 0.28
+    },
+    seed: {
+      x: position.x + matchSize.width - 8, // Right-aligned seed
+      y: position.y + matchSize.height * 0.28
+    },
+    school: {
+      x: position.x + 8, // Left-aligned school
+      y: position.y + matchSize.height * 0.42
+    }
   },
   participant2: {
-    x: position.x + matchSize.width / 2,
-    y: position.y + matchSize.height * 0.65  // Better vertical positioning
+    name: {
+      x: position.x + 8, // Left-aligned name
+      y: position.y + matchSize.height * 0.68
+    },
+    seed: {
+      x: position.x + matchSize.width - 8, // Right-aligned seed
+      y: position.y + matchSize.height * 0.68
+    },
+    school: {
+      x: position.x + 8, // Left-aligned school
+      y: position.y + matchSize.height * 0.82
+    }
+  },
+  score: {
+    x: position.x + matchSize.width / 2, // Centered score
+    y: position.y + matchSize.height * 0.95
   }
 });
 
@@ -47,11 +71,11 @@ const getMatchTextPositions = (position, matchSize) => ({
 const BRACKET_CONSTANTS = {
   DEFAULT_CONTAINER_HEIGHT: 1200,  // Base height for tournament layout calculations
   DEFAULT_PADDING: 60,             // Standard padding around bracket edges
-  MIN_MATCH_WIDTH: 180,            // Match box width for wrestler names
-  MIN_MATCH_HEIGHT: 90,            // Match box height for two participants
-  MIN_SPACING: 40,                 // Minimum vertical space between matches
+  MIN_MATCH_WIDTH: 220,            // Match box width for wrestler names, seeds, schools (increased)
+  MIN_MATCH_HEIGHT: 110,           // Match box height for two participants + scores (increased)
+  MIN_SPACING: 50,                 // Minimum vertical space between matches (increased)
   LEFT_MARGIN: 30,                 // Distance from left edge to first round
-  ROUND_SPACING: 220,              // Horizontal distance between tournament rounds
+  ROUND_SPACING: 260,              // Horizontal distance between tournament rounds (increased)
   BOTTOM_PADDING_EXTRA: 40,        // Additional bottom padding for scroll visibility
   MIN_HORIZONTAL_EXTENSION: 20,    // Minimum length for connecting line extensions
   HORIZONTAL_EXTENSION_RATIO: 0.4, // Fraction of gap used for line extensions
@@ -389,24 +413,92 @@ const ChampionshipBracket = ({
                     className={onMatchClick ? "cursor-pointer hover:fill-blue-50 hover:stroke-blue-400" : ""}
                     onClick={() => onMatchClick?.(match)}
                   />
+                  
+                  {/* Participant 1 */}
                   <text 
-                    x={textPositions.participant1.x} 
-                    y={textPositions.participant1.y} 
-                    textAnchor="middle" 
-                    className="text-sm font-medium fill-current pointer-events-none"
+                    x={textPositions.participant1.name.x} 
+                    y={textPositions.participant1.name.y} 
+                    textAnchor="start" 
+                    className="text-sm font-semibold fill-current pointer-events-none"
                     style={{ dominantBaseline: 'middle' }}
                   >
                     {match.participants[0]?.name || 'TBD'}
                   </text>
+                  {match.participants[0]?.seed && (
+                    <text 
+                      x={textPositions.participant1.seed.x} 
+                      y={textPositions.participant1.seed.y} 
+                      textAnchor="end" 
+                      className="text-sm font-bold fill-blue-600 pointer-events-none"
+                      style={{ dominantBaseline: 'middle' }}
+                    >
+                      {match.participants[0].seed}
+                    </text>
+                  )}
                   <text 
-                    x={textPositions.participant2.x} 
-                    y={textPositions.participant2.y} 
-                    textAnchor="middle" 
-                    className="text-sm font-medium fill-current pointer-events-none"
+                    x={textPositions.participant1.school.x} 
+                    y={textPositions.participant1.school.y} 
+                    textAnchor="start" 
+                    className="text-xs text-gray-600 fill-current pointer-events-none"
+                    style={{ dominantBaseline: 'middle' }}
+                  >
+                    {match.participants[0]?.school || ''}
+                  </text>
+                  
+                  {/* Participant 2 */}
+                  <text 
+                    x={textPositions.participant2.name.x} 
+                    y={textPositions.participant2.name.y} 
+                    textAnchor="start" 
+                    className="text-sm font-semibold fill-current pointer-events-none"
                     style={{ dominantBaseline: 'middle' }}
                   >
                     {match.participants[1]?.name || 'TBD'}
                   </text>
+                  {match.participants[1]?.seed && (
+                    <text 
+                      x={textPositions.participant2.seed.x} 
+                      y={textPositions.participant2.seed.y} 
+                      textAnchor="end" 
+                      className="text-sm font-bold fill-blue-600 pointer-events-none"
+                      style={{ dominantBaseline: 'middle' }}
+                    >
+                      {match.participants[1].seed}
+                    </text>
+                  )}
+                  <text 
+                    x={textPositions.participant2.school.x} 
+                    y={textPositions.participant2.school.y} 
+                    textAnchor="start" 
+                    className="text-xs text-gray-600 fill-current pointer-events-none"
+                    style={{ dominantBaseline: 'middle' }}
+                  >
+                    {match.participants[1]?.school || ''}
+                  </text>
+                  
+                  {/* Match Score */}
+                  {match.score && (
+                    <text 
+                      x={textPositions.score.x} 
+                      y={textPositions.score.y} 
+                      textAnchor="middle" 
+                      className="text-xs font-medium text-green-700 fill-current pointer-events-none"
+                      style={{ dominantBaseline: 'middle' }}
+                    >
+                      {match.score}
+                    </text>
+                  )}
+                  
+                  {/* Separator line between participants */}
+                  <line
+                    x1={pos.x + 4}
+                    y1={pos.y + matchSize.height / 2}
+                    x2={pos.x + matchSize.width - 4}
+                    y2={pos.y + matchSize.height / 2}
+                    stroke="#e5e7eb"
+                    strokeWidth="1"
+                    className="opacity-50"
+                  />
                 </g>
               );
             })
