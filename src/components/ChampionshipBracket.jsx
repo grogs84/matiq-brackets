@@ -25,7 +25,7 @@ const getMatchRightEdgeCenter = (position, matchSize) => ({
 });
 
 /**
- * Calculate text positions for match participants
+ * Calculate text positions for match participants with improved typography
  * @param {Object} position - Match position {x, y}
  * @param {Object} matchSize - Match dimensions {width, height}
  * @returns {Object} Text positions for participant1 and participant2
@@ -33,11 +33,11 @@ const getMatchRightEdgeCenter = (position, matchSize) => ({
 const getMatchTextPositions = (position, matchSize) => ({
   participant1: {
     x: position.x + matchSize.width / 2,
-    y: position.y + matchSize.height / 3
+    y: position.y + matchSize.height * 0.35  // Better vertical positioning
   },
   participant2: {
     x: position.x + matchSize.width / 2,
-    y: position.y + (2 * matchSize.height) / 3
+    y: position.y + matchSize.height * 0.65  // Better vertical positioning
   }
 });
 
@@ -45,17 +45,18 @@ const getMatchTextPositions = (position, matchSize) => ({
  * Wrestling bracket layout constants
  */
 const BRACKET_CONSTANTS = {
-  DEFAULT_CONTAINER_HEIGHT: 1200,
-  DEFAULT_PADDING: 60,
-  MIN_MATCH_WIDTH: 140,
-  MIN_MATCH_HEIGHT: 70,
-  MIN_SPACING: 20,
-  LEFT_MARGIN: 30,
-  ROUND_SPACING: 200,
-  BOTTOM_PADDING_EXTRA: 40,
-  MIN_HORIZONTAL_EXTENSION: 20,
-  HORIZONTAL_EXTENSION_RATIO: 0.4,
-  LINE_STROKE_WIDTH: 2
+  DEFAULT_CONTAINER_HEIGHT: 1200,  // Base height for tournament layout calculations
+  DEFAULT_PADDING: 60,             // Standard padding around bracket edges
+  MIN_MATCH_WIDTH: 180,            // Match box width for wrestler names
+  MIN_MATCH_HEIGHT: 90,            // Match box height for two participants
+  MIN_SPACING: 40,                 // Minimum vertical space between matches
+  LEFT_MARGIN: 30,                 // Distance from left edge to first round
+  ROUND_SPACING: 220,              // Horizontal distance between tournament rounds
+  BOTTOM_PADDING_EXTRA: 40,        // Additional bottom padding for scroll visibility
+  MIN_HORIZONTAL_EXTENSION: 20,    // Minimum length for connecting line extensions
+  HORIZONTAL_EXTENSION_RATIO: 0.4, // Fraction of gap used for line extensions
+  LINE_STROKE_WIDTH: 2,            // Thickness of bracket connecting lines
+  FIRST_MATCH_TOP_MARGIN: 100       // Y position offset for first match placement
 };
 
 /**
@@ -83,17 +84,17 @@ const calculateResponsiveLayout = (rounds, options = {}) => {
   const positions = {};
 
   // First round: evenly spaced vertically
-  const firstRound = rounds[0];
-  if (firstRound.length > 0) {
-    const firstRoundSpacing = Math.max(minMatchHeight + minSpacing, containerHeight / (firstRound.length + 1));
-    
-    firstRound.forEach((match, i) => {
-      positions[match.id] = {
-        x: leftMargin,
-        y: padding + (i + 1) * firstRoundSpacing
-      };
-    });
-  }
+const firstRound = rounds[0];
+if (firstRound.length > 0) {
+  const firstRoundSpacing = Math.max(minMatchHeight + minSpacing, containerHeight / (firstRound.length + 1));
+  
+  firstRound.forEach((match, i) => {
+    positions[match.id] = {
+      x: leftMargin,
+      y: BRACKET_CONSTANTS.FIRST_MATCH_TOP_MARGIN + (i * firstRoundSpacing)  // Start at 140px, use i instead of (i + 1)
+    };
+  });
+}
 
   // Subsequent rounds: center each match between its source matches
   for (let r = 1; r < rounds.length; r++) {
@@ -304,21 +305,26 @@ const ChampionshipBracket = ({
   // Calculate connecting lines between matches
   const connectingLines = calculateConnectingLines(matches, positions, matchSize);
 
-  // Recalculate dimensions to include connecting lines
+  // Recalculate dimensions to include connecting lines with proper validation
   const allXCoords = [
     ...Object.values(positions).map(p => p.x),
     ...Object.values(positions).map(p => p.x + matchSize.width),
     ...connectingLines.flatMap(line => [line.x1, line.x2])
-  ];
+  ].filter(coord => !isNaN(coord) && isFinite(coord)); // Filter out invalid coordinates
+
   const allYCoords = [
     ...Object.values(positions).map(p => p.y),
     ...Object.values(positions).map(p => p.y + matchSize.height),
     ...connectingLines.flatMap(line => [line.y1, line.y2])
-  ];
+  ].filter(coord => !isNaN(coord) && isFinite(coord)); // Filter out invalid coordinates
+
+  // Safe dimension calculation with fallbacks
+  const maxX = allXCoords.length > 0 ? Math.max(...allXCoords) : dimensions.width;
+  const maxY = allYCoords.length > 0 ? Math.max(...allYCoords) : dimensions.height;
 
   const finalDimensions = {
-    width: Math.max(dimensions.width, Math.max(...allXCoords) + BRACKET_CONSTANTS.DEFAULT_PADDING),
-    height: Math.max(dimensions.height, Math.max(...allYCoords) + BRACKET_CONSTANTS.BOTTOM_PADDING_EXTRA)
+    width: Math.max(600, maxX + BRACKET_CONSTANTS.DEFAULT_PADDING),
+    height: Math.max(400, maxY + BRACKET_CONSTANTS.BOTTOM_PADDING_EXTRA)
   };
 
   return (
@@ -331,34 +337,40 @@ const ChampionshipBracket = ({
           className="w-full border border-gray-300"
           style={{ height: `${finalDimensions.height}px`, minHeight: '400px' }}
         >
-          <text 
+          {/* <text 
             x={finalDimensions.width / 2} 
             y="30" 
             textAnchor="middle" 
             className="text-lg font-bold fill-current"
           >
             Championship
-          </text>
+          </text> */}
           
           {/* Connecting lines - drawn first so they appear behind matches */}
-          {connectingLines.map((line) => (
-            <line
-              key={line.id}
-              x1={line.x1}
-              y1={line.y1}
-              x2={line.x2}
-              y2={line.y2}
-              stroke="#d1d5db"
-              strokeWidth={BRACKET_CONSTANTS.LINE_STROKE_WIDTH}
-              className="opacity-60"
-            />
-          ))}
+          {connectingLines
+            .filter(line => 
+              !isNaN(line.x1) && !isNaN(line.y1) && 
+              !isNaN(line.x2) && !isNaN(line.y2)
+            )
+            .map((line) => (
+              <line
+                key={line.id}
+                x1={line.x1}
+                y1={line.y1}
+                x2={line.x2}
+                y2={line.y2}
+                stroke="#d1d5db"
+                strokeWidth={BRACKET_CONSTANTS.LINE_STROKE_WIDTH}
+                className="opacity-60"
+              />
+            ))
+          }
           
           {/* Match boxes - drawn on top of lines */}
           {rounds.map((roundMatches) =>
             roundMatches.map((match) => {
               const pos = positions[match.id];
-              if (!pos) return null;
+              if (!pos || isNaN(pos.x) || isNaN(pos.y)) return null; // Skip invalid positions
               
               const textPositions = getMatchTextPositions(pos, matchSize);
               
@@ -371,15 +383,18 @@ const ChampionshipBracket = ({
                     height={matchSize.height}
                     fill="white"
                     stroke="black"
-                    strokeWidth="1"
-                    className={onMatchClick ? "cursor-pointer hover:fill-blue-50" : ""}
+                    strokeWidth="1.5"
+                    rx="3"
+                    ry="3"
+                    className={onMatchClick ? "cursor-pointer hover:fill-blue-50 hover:stroke-blue-400" : ""}
                     onClick={() => onMatchClick?.(match)}
                   />
                   <text 
                     x={textPositions.participant1.x} 
                     y={textPositions.participant1.y} 
                     textAnchor="middle" 
-                    className="text-xs fill-current pointer-events-none"
+                    className="text-sm font-medium fill-current pointer-events-none"
+                    style={{ dominantBaseline: 'middle' }}
                   >
                     {match.participants[0]?.name || 'TBD'}
                   </text>
@@ -387,9 +402,10 @@ const ChampionshipBracket = ({
                     x={textPositions.participant2.x} 
                     y={textPositions.participant2.y} 
                     textAnchor="middle" 
-                    className="text-xs fill-current pointer-events-none"
+                    className="text-sm font-medium fill-current pointer-events-none"
+                    style={{ dominantBaseline: 'middle' }}
                   >
-                    vs {match.participants[1]?.name || 'TBD'}
+                    {match.participants[1]?.name || 'TBD'}
                   </text>
                 </g>
               );
