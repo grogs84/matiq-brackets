@@ -1,5 +1,6 @@
 import './App.css'
 import ChampionshipBracket from './components/ChampionshipBracket'
+import ConsolationBracket from './components/ConsolationBracket'
 
 function App() {
   // Sample championship bracket matches with embedded participant data
