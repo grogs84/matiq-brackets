@@ -11,6 +11,7 @@ node_modules
 dist
 dist-ssr
 *.local
+storybook-static
 
 # Editor directories and files
 .vscode/*
@@ -22,6 +23,13 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Build artifacts and temporary files
+apps/*/dist/
+apps/*/storybook-static/
+packages/*/dist/
+.tmp
+.cache
 
 *storybook.log
 storybook-static

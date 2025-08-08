@@ -1,129 +1,138 @@
-# Wrestling Bracket Visualization
+# matiq-brackets
 
-Interactive NCAA D1 wrestling tournament bracket visualization built with React + Vite and Tailwind CSS following a **component-first design approach**.
+A monorepo containing wrestling bracket visualization components and development tools.
 
-## Project Overview
+## 🏗️ Project Structure
 
-This application visualizes NCAA D1 wrestling tournament brackets with complex double elimination structures. Wrestling tournaments have unique flow patterns where losers from the championship bracket enter the consolation bracket at specific positions, creating non-linear tournament flows.
+This repository is organized as a monorepo with clear separation between the component library, demo applications, and shared data:
 
-The project follows **incremental development** with a focus on building reusable wrestling bracket components that work with both PostgreSQL (normalized) and Neo4j (embedded) data structures.
-
-## Current Features ✅
-
-- **ChampionshipBracket Component**: Complete SVG-based championship bracket rendering
-- **Flat Database Structure**: Database-agnostic tournament tree traversal using winner_next_match_id pointers
-- **"Box Pattern" Connecting Lines**: Wrestling-style bracket lines with proper multi-segment connections
-- **Enhanced Match Cards**: Wrestler names, seeds, schools, and winner-based scoring display
-- **Responsive SVG Layout**: Tournament tree positioning with proper spacing algorithms
-- **Embedded Data Approach**: Components expect complete participant data (no external references)
-- **Tournament Tree Algorithm**: Handles 8, 16, and 32-wrestler championship brackets
-
-## Technical Stack
-
-- **Frontend**: React 18 + Vite
-- **Styling**: Tailwind CSS utility-first approach
-- **Rendering**: SVG-based bracket visualization with mathematical positioning
-- **Data**: Database-agnostic flat structure (works with PostgreSQL/Neo4j)
-- **Component Library**: Clean exports/imports following modern React patterns
-
-## Screenshots
-
-### Championship Bracket - Current Implementation (August 2025)
-
-![Championship Bracket Current](brackets/sample.png)
-*32-wrestler championship bracket with enhanced match cards and winner-based scoring*
-
-### Previous Implementation
-
-![Championship Bracket Previous](brackets/screen.jpg)
-*Earlier version for comparison*
-
-The current implementation shows:
-- **Left-aligned seeds**: [1], [2] format before wrestler names with same font styling
-- **Winner-based scoring**: Scores appear inline with winner's name (Fall times, decision scores)  
-- **School display**: University names below wrestler names in smaller gray text
-- **"Box pattern" connecting lines**: Multi-segment lines following wrestling bracket conventions
-- **Tournament tree positioning**: Proper mathematical spacing between rounds
-- **Interactive matches**: Optional click handlers for match details
-- **Responsive SVG layout**: Scales properly across different screen sizes
-
-### Match Card Layout Enhancement
-
-**Current Layout (✅)**:
 ```
-[1] Matt McDonough        Fall 3:24
-    Iowa
-
-    Jared Germaine
-    Penn State
+matiq-brackets/
+├── packages/matiq-brackets/         # 📦 Component library (publishable)
+├── apps/demo/                       # 🚀 Demo application
+├── apps/storybook/                  # 📚 Component documentation and testing
+├── sample-data/                     # 🎯 Shared tournament data
+└── package.json                     # Workspace configuration
 ```
 
-**Previous Layout**:
+## 🚀 Quick Start
+
+### Development
+
+```bash
+# Install all dependencies
+npm install
+
+# Run demo application (http://localhost:5173)
+npm run demo
+
+# Run Storybook for component development (http://localhost:6006)  
+npm run storybook
 ```
-Matt McDonough                    1
-Iowa
-Jared Germaine                    
-Penn State
-            Fall 3:24
+
+### Building
+
+```bash
+# Build demo application
+npm run build:demo
+
+# Build Storybook
+npm run build:storybook
+
+# Build everything
+npm run build:all
 ```
 
-## Development
+## 📦 Component Library (`packages/matiq-brackets`)
 
-### Prerequisites
+The core wrestling bracket components for React applications.
 
-- Node.js (v18+ recommended)
-- npm
+### Installation
 
-### Getting Started
+```bash
+npm install matiq-brackets
+```
 
-1. Install dependencies:
-   ```bash
-   npm install
-   ```
+### Usage
 
-2. Start the development server:
-   ```bash
-   npm run dev
-   ```
+```javascript
+import { ChampionshipBracket } from 'matiq-brackets';
 
-2. Start the development server:
-   ```bash
-   npm run dev
-   ```
+const MyTournament = () => {
+  const matches = [
+    {
+      id: "final",
+      participants: [
+        { name: "Matt McDonough", seed: 1, school: "Iowa" },
+        { name: "Nick Suriano", seed: 2, school: "Rutgers" }
+      ],
+      winner: "Matt McDonough",
+      score: "7-2"
+    }
+    // ... more matches
+  ];
 
-3. Open [http://localhost:5174](http://localhost:5174) to view the application
+  return (
+    <ChampionshipBracket 
+      matches={matches}
+      onMatchClick={(match) => console.log('Match clicked:', match)}
+    />
+  );
+};
+```
 
-### Available Scripts
+### Features
 
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm run preview` - Preview production build
-- `npm run lint` - Run ESLint
+- **SVG-based rendering** for precise positioning and scaling
+- **Embedded participant data** - no external lookups required
+- **"Box pattern" connecting lines** following wrestling bracket conventions
+- **Enhanced match cards** with seeds, schools, and winner-based scoring
+- **Interactive matches** with optional click handlers
+- **Database-agnostic design** using flat structure with pointer relationships
+- **Responsive layout** that adapts to different screen sizes
+
+## 🚀 Demo Application (`apps/demo`)
+
+A complete showcase application demonstrating the bracket components in action. Features a full 32-wrestler championship bracket with realistic tournament data.
+
+**Run locally:** `npm run demo`
+
+## 📚 Storybook (`apps/storybook`)
+
+Comprehensive component documentation and isolated testing environment with multiple scenarios:
+
+- **Full Tournament**: Complete 32-wrestler championship bracket
+- **Scenario Testing**: Finals-only, semifinals + finals for focused development
+- **Edge Cases**: Long names, missing data, text overflow handling  
+- **Interactive Controls**: Test with and without click handlers
+
+**Run locally:** `npm run storybook`
+
+## 🎯 Sample Data (`sample-data/`)
+
+Centralized tournament data shared across demo and Storybook applications:
+
+- **championship-bracket.js**: Complete 5-round tournament (32→16→8→4→2→1)
+- Realistic wrestler names, seeds, schools, and match outcomes
+- Proper `winner_next_match_id` relationships for bracket flow
+- Wrestling-specific scoring formats (Falls, OT, TB decisions)
+
+## 🛠️ Development
 
 ### Component Development
 
-The ChampionshipBracket component follows **pure component** design principles:
+Components are developed as pure TypeScript source files with no build step. The library exports ES6 modules that work directly with modern bundlers.
 
-```javascript
-// ChampionshipBracket usage
-import ChampionshipBracket from './components/ChampionshipBracket'
+### Data Structure
 
-<ChampionshipBracket 
-  matches={sampleMatches}
-  onMatchClick={handleMatchClick}  // Optional click handler
-/>
-```
-
-## Data Structure - Embedded Participant Approach
-
-Components expect matches with **embedded participant data** (not separate arrays):
+Components expect matches with **embedded participant data**:
 
 ```javascript
 const match = {
   id: "r1m1",
   participants: [
     { name: "Matt McDonough", seed: 1, school: "Iowa" },
-    { name: "Jared Germaine", school: "Penn State" }
+    { name: "Jared Germaine", seed: null, school: "Penn State" }
   ],
   winner: "Matt McDonough",
   score: "Fall 3:24",
@@ -133,127 +142,51 @@ const match = {
 }
 ```
 
-## Wrestling Tournament Structure
+## 📋 Available Scripts
 
-### Championship Bracket ✅ IMPLEMENTED
-- Single elimination tournament tree with 5 rounds (32 → 16 → 8 → 4 → 2 → 1)
-- Database-agnostic traversal using winner_next_match_id pointers
-- Proper "box pattern" connecting lines between matches
-- Enhanced match cards with seeds, schools, and winner-based scoring
-- Responsive SVG positioning algorithm
+| Command | Description |
+|---------|-------------|
+| `npm run demo` | Start demo application |
+| `npm run storybook` | Start Storybook development server |
+| `npm run build:demo` | Build demo application |
+| `npm run build:storybook` | Build Storybook |
+| `npm run build:all` | Build all applications |
+| `npm run lint` | Run ESLint across workspace |
 
-### Consolation Bracket 📋 PLANNED
-- Complex double elimination system
-- Championship bracket losers enter at specific positions
-- Multiple paths back to placement matches (3rd, 5th, 7th place)
-- Non-linear flow specific to wrestling rules
-
-## Current Implementation Status
-
-✅ **ChampionshipBracket Component**: Complete with SVG rendering, connecting lines, match cards  
-✅ **Tournament Tree Algorithm**: Database-agnostic flat structure traversal  
-✅ **"Box Pattern" Connecting Lines**: Multi-segment lines following wrestling conventions  
-✅ **Enhanced Match Cards**: Seeds, schools, winner-based scoring, responsive text positioning  
-✅ **Utility Functions**: DRY principles, documented constants, NaN validation  
-✅ **Responsive Layout**: Tournament positioning algorithm with proper spacing  
-🔄 **Consolation Bracket Component**: Planning phase - complex wrestling flow patterns  
-🔄 **Cross-bracket Connections**: Visual lines between championship and consolation sections  
-📋 **Backend Integration**: PostgreSQL/FastAPI connection (future enhancement)  
-
-## Architecture Highlights
+## 🏛️ Architecture
 
 ### Component-First Design
 - Components define their own data contracts
-- Users adapt data to fit component expectations
-- Pure components with no side effects, clear prop interfaces
+- Users adapt data to fit component expectations  
+- Pure components with no side effects
 
-### Database Agnostic Approach
-- Works with both PostgreSQL (normalized) and Neo4j (embedded) structures
-- Flat database design using winner_next_match_id/winner_prev_match_id fields
+### Database Agnostic
+- Works with PostgreSQL (normalized) and Neo4j (embedded) structures
+- Flat database design using pointer fields (`winner_next_match_id`)
 - No complex JOIN queries or graph traversals required
-
-### Embedded Data Pattern
-```javascript
-// ✅ Component expects complete data
-match.participants = [
-  { name: "Matt McDonough", seed: 1, school: "Iowa" },
-  { name: "Jared Germaine", school: "Penn State" }
-]
-
-// ❌ Not separate arrays with references
-wrestlers = [{ id: "w1", name: "Matt McDonough" }]
-match.participant_ids = ["w1", "w2"]
-```  
-
-## Key Technical Challenges
-
-### 1. Tournament Tree Positioning Algorithm ✅ SOLVED
-- **Challenge**: Mathematical positioning of matches in proper tournament tree layout
-- **Solution**: Recursive algorithm that centers each match between its source matches
-- **Implementation**: `calculateResponsiveLayout()` function with first round spacing and subsequent round centering
-
-### 2. "Box Pattern" Connecting Lines ✅ SOLVED
-- **Challenge**: Wrestling brackets use specific multi-segment line patterns, not simple connections
-- **Solution**: Four-segment box pattern (horizontal → vertical → horizontal → target)
-- **Implementation**: `calculateConnectingLines()` with proper extension calculations and SVG line rendering
-
-### 3. Database-Agnostic Design ✅ SOLVED
-- **Challenge**: Work with both relational (PostgreSQL) and graph (Neo4j) database structures
-- **Solution**: Flat structure using winner_next_match_id pointers instead of complex JOINs
-- **Implementation**: `buildRoundsFromTree()` traverses matches without database-specific logic
-
-### 4. Consolation Bracket Flow 🔄 IN PROGRESS
-- **Challenge**: Wrestling's unique double elimination requires non-linear positioning algorithms
-- **Solution**: Separate component with wrestling-specific advancement rules
-- **Status**: Planning phase - analyzing NCAA bracket PDFs for flow patterns
-
-### 5. Winner-Based Match Card Layout ✅ SOLVED
-- **Challenge**: Display seeds, schools, and scores with proper wrestling tournament formatting
-- **Solution**: Conditional rendering with winner-based score positioning and inline seeds
-- **Implementation**: `getMatchTextPositions()` with participant-specific text coordinates
-
-## Development Philosophy
-
-### Incremental Development
-- Build and test one component at a time, hands-on approach
-- Each feature works completely before moving to next
-- Isolated component development in main application
-
-### Pure Components
-- No side effects, easy to test, clear prop interfaces
-- Components receive complete data, not references
-- Optional handlers for interaction (onMatchClick)
 
 ### Wrestling Tournament Specifics
 - 32-man double elimination tournament structure
 - Sport-specific advancement rules (not generic tournament logic)
 - Multiple placement matches (3rd, 5th, 7th place)
-- Visual styling matches NCAA bracket PDFs
+- Visual styling matches NCAA bracket conventions
 
-## Project Structure
+## 📖 Documentation
 
-```
-src/
-├── components/
-│   └── ChampionshipBracket.jsx      # ✅ Complete championship bracket component
-├── App.jsx                          # ✅ Test harness with sample tournament data
-└── main.jsx
+- [Component API Documentation](packages/matiq-brackets/README.md)
+- [Development Guide](COMPONENT_DESIGN.md) 
+- [Project Roadmap](ROADMAP.md)
+- [Reference Brackets](brackets/) - NCAA bracket PDFs for accuracy
 
-brackets/                            # 📋 Reference materials
-├── NCAA2012.pdf                     # Actual NCAA bracket PDFs for accuracy
-├── NCAA2019.pdf
-└── *.png                           # Development screenshots and issue tracking
-```
+## 🤝 Contributing
 
-## Next Development Priorities
+1. Clone the repository
+2. Run `npm install` to install dependencies
+3. Use `npm run demo` or `npm run storybook` for development
+4. Make changes to components in `packages/matiq-brackets/`
+5. Test in both demo and Storybook
+6. Submit a pull request
 
-1. **Consolation Bracket Component**: Handle complex double-elimination flow where championship losers enter at specific positions
-2. **Cross-bracket Connecting Lines**: Visual connections between matches in championship and consolation sections  
-3. **Tournament Format Flexibility**: Support different wrestling tournament rules across years
-4. **Match Status Visualization**: Different styling for completed/upcoming/in-progress matches
+## 📄 License
 
-## References
-
-- `COMPONENT_DESIGN.md`: Detailed component architecture and API design
-- `ROADMAP.md`: Development phases and progress tracking
-- `/brackets/*.pdf`: Actual NCAA bracket PDFs for visual accuracy
+MIT - See [LICENSE](LICENSE) for details.

@@ -1,0 +1,34 @@
+{
+  "name": "matiq-brackets",
+  "version": "0.1.0",
+  "description": "Wrestling bracket visualization components for React",
+  "type": "module",
+  "main": "./src/index.js",
+  "module": "./src/index.js",
+  "exports": {
+    ".": {
+      "import": "./src/index.js",
+      "require": "./src/index.js"
+    }
+  },
+  "files": [
+    "src"
+  ],
+  "keywords": [
+    "react",
+    "wrestling",
+    "bracket",
+    "tournament",
+    "visualization",
+    "svg"
+  ],
+  "author": "matiq-brackets",
+  "license": "MIT",
+  "peerDependencies": {
+    "react": "^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0",
+    "react-dom": "^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0"
+  },
+  "devDependencies": {
+    "prop-types": "^15.8.1"
+  }
+}

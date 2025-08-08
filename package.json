@@ -1,11 +1,21 @@
 {
-  "name": "matiq-brackets",
+  "name": "matiq-brackets-monorepo",
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
   "scripts": {
-    "dev": "vite",
+    "dev": "npm run demo",
+    "demo": "npm run dev --workspace=@matiq-brackets/demo",
+    "storybook": "npm run storybook --workspace=@matiq-brackets/storybook",
     "build": "vite build",
+    "build:lib": "echo 'Component library uses TypeScript source files directly - no build needed'",
+    "build:demo": "npm run build --workspace=@matiq-brackets/demo", 
+    "build:storybook": "npm run build-storybook --workspace=@matiq-brackets/storybook",
+    "build:all": "npm run build:lib && npm run build:demo && npm run build:storybook",
     "lint": "eslint .",
     "preview": "vite preview"
   },
