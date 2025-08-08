@@ -12,7 +12,7 @@
     "demo": "npm run dev --workspace=@matiq-brackets/demo",
     "storybook": "npm run storybook --workspace=@matiq-brackets/storybook",
     "build": "vite build",
-    "build:lib": "npm run build --workspace=matiq-brackets",
+    "build:lib": "echo 'Component library uses TypeScript source files directly - no build needed'",
     "build:demo": "npm run build --workspace=@matiq-brackets/demo", 
     "build:storybook": "npm run build-storybook --workspace=@matiq-brackets/storybook",
     "build:all": "npm run build:lib && npm run build:demo && npm run build:storybook",
