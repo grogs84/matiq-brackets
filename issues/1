@@ -1,0 +1,19 @@
+### Issue Title: Extract shared bracket utilities and consolidate common logic
+
+#### Description:
+This issue focuses on consolidating the logic between the `ChampionshipBracket` and `ConsolationBracket` components. The following areas need to be addressed:
+
+1. **SVG Container Logic**: Identify and unify the SVG container logic used in both brackets to ensure consistency and reduce redundancy.
+2. **Layout Constants**: Review layout constants shared between the two components and create a centralized location for these constants.
+3. **Positioning Algorithms**: Analyze the positioning algorithms in use and streamline them to eliminate duplication.
+4. **Connecting Lines Utilities**: Refactor the connecting lines utilities to be reusable between the two components.
+5. **Match Rendering Logic**: Standardize the match rendering logic to promote DRY principles.
+
+#### References:
+This work should be initiated after PR #27 is merged and should be completed before continuing with issue #19.
+
+#### Examples:
+- **ChampionshipBracket Component**: The current implementation of match rendering within the `ChampionshipBracket` component shows significant duplication of logic that could be abstracted.
+
+#### Duplication Concerns:
+This issue addresses the duplication concerns that were raised during the development of the `ConsolationBracket` component, ensuring a more maintainable and cleaner codebase.
