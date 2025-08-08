@@ -66,10 +66,17 @@ function App() {
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-8">
-        <div className="bg-white rounded-lg shadow-lg p-6 max-h-[calc(150vh-200px)]">
+      <main className="container mx-auto px-4 py-8 space-y-8">
+        <div className="bg-white rounded-lg shadow-lg p-6">
           <ChampionshipBracket 
             matches={sampleMatches}
+            onMatchClick={handleMatchClick}
+          />
+        </div>
+        
+        <div className="bg-white rounded-lg shadow-lg p-6">
+          <ConsolationBracket 
+            matches={[]} // Empty for now - will be populated later
             onMatchClick={handleMatchClick}
           />
         </div>
