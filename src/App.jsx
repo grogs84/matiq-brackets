@@ -1,5 +1,5 @@
 import './App.css'
-import { ChampionshipBracket } from 'matiq-brackets'
+import ChampionshipBracket from './components/ChampionshipBracket'
 
 function App() {
   // Sample championship bracket matches with embedded participant data

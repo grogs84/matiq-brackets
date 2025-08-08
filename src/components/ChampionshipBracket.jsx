@@ -1,13 +1,12 @@
 import React from 'react';
-import { Match, Participant, BracketPosition, BracketDimensions, BracketLayout, ConnectingLine } from '../types';
 
 /**
  * Create lookup map for matches by ID
- * @param matches - Array of match objects  
- * @returns Map of match.id -> match object
+ * @param {Array} matches - Array of match objects  
+ * @returns {Object} Map of match.id -> match object
  */
-const createMatchMap = (matches: Match[]): Record<string, Match> => {
-  const matchMap: Record<string, Match> = {};
+const createMatchMap = (matches) => {
+  const matchMap = {};
   matches.forEach(match => {
     matchMap[match.id] = match;
   });
@@ -16,22 +15,22 @@ const createMatchMap = (matches: Match[]): Record<string, Match> => {
 
 /**
  * Get right edge center point of a match box
- * @param position - Match position {x, y}
- * @param matchSize - Match dimensions {width, height}
- * @returns Right edge center coordinates {x, y}
+ * @param {Object} position - Match position {x, y}
+ * @param {Object} matchSize - Match dimensions {width, height}
+ * @returns {Object} Right edge center coordinates {x, y}
  */
-const getMatchRightEdgeCenter = (position: BracketPosition, matchSize: BracketDimensions): BracketPosition => ({
+const getMatchRightEdgeCenter = (position, matchSize) => ({
   x: position.x + matchSize.width,
   y: position.y + matchSize.height / 2
 });
 
 /**
  * Calculate text positions for match participants with enhanced layout for scores, seeds, and schools
- * @param position - Match position {x, y}
- * @param matchSize - Match dimensions {width, height}
- * @returns Text positions for participant1, participant2 with seeds inline and winner-based scoring
+ * @param {Object} position - Match position {x, y}
+ * @param {Object} matchSize - Match dimensions {width, height}
+ * @returns {Object} Text positions for participant1, participant2 with seeds inline and winner-based scoring
  */
-const getMatchTextPositions = (position: BracketPosition, matchSize: BracketDimensions) => ({
+const getMatchTextPositions = (position, matchSize) => ({
   participant1: {
     seedAndName: {
       x: position.x + 8, // Left-aligned seed and name
@@ -64,10 +63,10 @@ const getMatchTextPositions = (position: BracketPosition, matchSize: BracketDime
 
 /**
  * Format participant display name with seed prefix
- * @param participant - Participant object with name and seed
- * @returns Formatted name with seed prefix (e.g., "[1] Matt McDonough")
+ * @param {Object} participant - Participant object with name and seed
+ * @returns {string} Formatted name with seed prefix (e.g., "[1] Matt McDonough")
  */
-const formatParticipantName = (participant?: Participant): string => {
+const formatParticipantName = (participant) => {
   if (!participant) return 'TBD';
   const seed = participant.seed ? `[${participant.seed}] ` : '';
   return `${seed}${participant.name || 'TBD'}`;
@@ -75,12 +74,12 @@ const formatParticipantName = (participant?: Participant): string => {
 
 /**
  * Determine if participant is the winner of the match
- * @param match - Match object with winner field
- * @param participant - Participant to check
- * @returns True if participant is the winner
+ * @param {Object} match - Match object with winner field
+ * @param {Object} participant - Participant to check
+ * @returns {boolean} True if participant is the winner
  */
-const isWinner = (match: Match, participant?: Participant): boolean => {
-  return !!(match.winner && participant && match.winner === participant.name);
+const isWinner = (match, participant) => {
+  return match.winner && participant && match.winner === participant.name;
 };
 
 /**
@@ -101,21 +100,13 @@ const BRACKET_CONSTANTS = {
   FIRST_MATCH_TOP_MARGIN: 100       // Y position offset for first match placement
 };
 
-interface LayoutOptions {
-  containerHeight?: number;
-  padding?: number;
-  minMatchWidth?: number;
-  minMatchHeight?: number;
-  minSpacing?: number;
-}
-
 /**
  * Calculate responsive tournament tree dimensions and positions
- * @param rounds - Array of round arrays containing matches
- * @param options - Sizing options {containerWidth, containerHeight, padding}
+ * @param {Array} rounds - Array of round arrays containing matches
+ * @param {Object} options - Sizing options {containerWidth, containerHeight, padding}
  */
-const calculateResponsiveLayout = (rounds: Match[][], options: LayoutOptions = {}): BracketLayout => {
-  if (rounds.length === 0) return { positions: {}, dimensions: { width: 400, height: 300 }, matchSize: { width: 220, height: 110 } };
+const calculateResponsiveLayout = (rounds, options = {}) => {
+  if (rounds.length === 0) return { positions: {}, dimensions: { width: 400, height: 300 } };
 
   // Default options with larger container for better initial layout
   const {
@@ -131,20 +122,20 @@ const calculateResponsiveLayout = (rounds: Match[][], options: LayoutOptions = {
   const leftMargin = BRACKET_CONSTANTS.LEFT_MARGIN;
   const roundSpacing = BRACKET_CONSTANTS.ROUND_SPACING;
 
-  const positions: Record<string, BracketPosition> = {};
+  const positions = {};
 
   // First round: evenly spaced vertically
-  const firstRound = rounds[0];
-  if (firstRound.length > 0) {
-    const firstRoundSpacing = Math.max(minMatchHeight + minSpacing, containerHeight / (firstRound.length + 1));
-    
-    firstRound.forEach((match, i) => {
-      positions[match.id] = {
-        x: leftMargin,
-        y: BRACKET_CONSTANTS.FIRST_MATCH_TOP_MARGIN + (i * firstRoundSpacing)  // Start at 100px, use i instead of (i + 1)
-      };
-    });
-  }
+const firstRound = rounds[0];
+if (firstRound.length > 0) {
+  const firstRoundSpacing = Math.max(minMatchHeight + minSpacing, containerHeight / (firstRound.length + 1));
+  
+  firstRound.forEach((match, i) => {
+    positions[match.id] = {
+      x: leftMargin,
+      y: BRACKET_CONSTANTS.FIRST_MATCH_TOP_MARGIN + (i * firstRoundSpacing)  // Start at 140px, use i instead of (i + 1)
+    };
+  });
+}
 
   // Subsequent rounds: center each match between its source matches
   for (let r = 1; r < rounds.length; r++) {
@@ -196,8 +187,8 @@ const calculateResponsiveLayout = (rounds: Match[][], options: LayoutOptions = {
  * Build championship bracket rounds using flat match structure
  * Works with database format using winner_next_match_id pointers
  */
-const buildRoundsFromTree = (matches: Match[]): Match[][] => {
-  const rounds: Match[][] = [];
+const buildRoundsFromTree = (matches) => {
+  const rounds = [];
   const matchMap = createMatchMap(matches);
   
   // Find first round: matches with no winner_prev_match_id
@@ -213,8 +204,8 @@ const buildRoundsFromTree = (matches: Match[]): Match[][] => {
   let currentRound = firstRound;
   
   while (currentRound.length > 1) {
-    const nextRound: Match[] = [];
-    const processedMatches = new Set<string>();
+    const nextRound = [];
+    const processedMatches = new Set();
     
     currentRound.forEach(match => {
       const nextMatchId = match.winner_next_match_id;
@@ -240,16 +231,16 @@ const buildRoundsFromTree = (matches: Match[]): Match[][] => {
 
 /**
  * Calculate connecting lines between tournament matches using bracket-style box pattern
- * @param matches - All matches in the tournament
- * @param positions - Match position coordinates
- * @param matchSize - Match box dimensions
- * @returns Array of line objects with start/end coordinates
+ * @param {Array} matches - All matches in the tournament
+ * @param {Object} positions - Match position coordinates
+ * @param {Object} matchSize - Match box dimensions
+ * @returns {Array} Array of line objects with start/end coordinates
  */
-const calculateConnectingLines = (matches: Match[], positions: Record<string, BracketPosition>, matchSize: BracketDimensions): ConnectingLine[] => {
-  const lines: ConnectingLine[] = [];
+const calculateConnectingLines = (matches, positions, matchSize) => {
+  const lines = [];
   
   // Group matches by their winner_next_match_id to find pairs that feed into the same target
-  const targetGroups: Record<string, Match[]> = {};
+  const targetGroups = {};
   matches.forEach(match => {
     const nextMatchId = match.winner_next_match_id;
     if (nextMatchId) {
@@ -335,20 +326,13 @@ const calculateConnectingLines = (matches: Match[], positions: Record<string, Br
   return lines;
 };
 
-export interface ChampionshipBracketProps {
-  /** Array of matches with embedded participant data */
-  matches?: Match[];
-  /** Optional callback when a match is clicked */
-  onMatchClick?: (match: Match) => void;
-}
-
 /**
  * ChampionshipBracket - Renders responsive championship bracket matches
  * 
  * Expects matches with embedded participant data:
  * match.participants[0/1] = { id, name, seed, school, ... }
  */
-export const ChampionshipBracket: React.FC<ChampionshipBracketProps> = ({ 
+const ChampionshipBracket = ({ 
   matches = [],
   onMatchClick 
 }) => {
@@ -394,6 +378,15 @@ export const ChampionshipBracket: React.FC<ChampionshipBracketProps> = ({
           className="w-full border border-gray-300"
           style={{ height: `${finalDimensions.height}px`, minHeight: '400px' }}
         >
+          {/* <text 
+            x={finalDimensions.width / 2} 
+            y="30" 
+            textAnchor="middle" 
+            className="text-lg font-bold fill-current"
+          >
+            Championship
+          </text> */}
+          
           {/* Connecting lines - drawn first so they appear behind matches */}
           {connectingLines
             .filter(line => 
