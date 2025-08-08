@@ -4,16 +4,23 @@
   "version": "0.0.0",
   "type": "module",
   "workspaces": [
-    "packages/*"
+    "packages/*",
+    "apps/*"
   ],
   "scripts": {
-    "dev": "vite",
+    "dev": "npm run demo",
+    "demo": "npm run dev --workspace=@matiq-brackets/demo",
+    "storybook": "npm run storybook --workspace=@matiq-brackets/storybook",
     "build": "vite build",
+    "build:lib": "npm run build --workspace=matiq-brackets",
+    "build:demo": "npm run build --workspace=@matiq-brackets/demo", 
+    "build:storybook": "npm run build-storybook --workspace=@matiq-brackets/storybook",
+    "build:all": "npm run build:lib && npm run build:demo && npm run build:storybook",
     "lint": "eslint .",
     "preview": "vite preview"
   },
   "dependencies": {
-    "matiq-brackets": "workspace:*",
+    "matiq-brackets": "file:./packages/matiq-brackets",
     "react": "^19.1.0",
     "react-dom": "^19.1.0"
   },
