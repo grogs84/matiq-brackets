@@ -1,9 +1,8 @@
 import './App.css'
 import { ChampionshipBracket } from 'matiq-brackets'
-import { sampleChampionshipMatches, sampleMatchClickHandler, sampleChampionshipBracket2 } from '../../../sample-data/championship-bracket.js'
+import { sampleMatchClickHandler, sampleChampionshipBracket2 } from '../../../sample-data/championship-bracket.js'
 
 function App() {
-
   return (
     <div className="min-h-screen bg-gray-100">
       <header className="bg-blue-900 text-white py-6">

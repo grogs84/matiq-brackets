@@ -59,7 +59,13 @@ export function calculateResponsiveLayout(
       const prevMatch1 = match.winner_prev_match_id;
       const prevMatch2 = match.loser_prev_match_id;
       
-      if (prevMatch1 && prevMatch2 && positions[prevMatch1] && positions[prevMatch2]) {
+      // Robust positioning: check for both predecessor matches and validate their positions
+      if (prevMatch1 && prevMatch2 && 
+          positions[prevMatch1] && positions[prevMatch2] &&
+          typeof positions[prevMatch1].y === 'number' && 
+          typeof positions[prevMatch2].y === 'number' &&
+          !isNaN(positions[prevMatch1].y) && !isNaN(positions[prevMatch2].y)) {
+        
         // Position this match at the midpoint between its two source matches
         const y1 = positions[prevMatch1].y;
         const y2 = positions[prevMatch2].y;
@@ -69,8 +75,27 @@ export function calculateResponsiveLayout(
           x: leftMargin + r * roundSpacing,
           y: centerY
         };
+      } else if (prevMatch1 && positions[prevMatch1] && 
+                 typeof positions[prevMatch1].y === 'number' && 
+                 !isNaN(positions[prevMatch1].y)) {
+        
+        // Single predecessor case: position relative to the one available predecessor
+        positions[match.id] = {
+          x: leftMargin + r * roundSpacing,
+          y: positions[prevMatch1].y
+        };
+      } else if (prevMatch2 && positions[prevMatch2] && 
+                 typeof positions[prevMatch2].y === 'number' && 
+                 !isNaN(positions[prevMatch2].y)) {
+        
+        // Single predecessor case: position relative to the one available predecessor
+        positions[match.id] = {
+          x: leftMargin + r * roundSpacing,
+          y: positions[prevMatch2].y
+        };
       } else {
-        // Fallback: space matches evenly in this round (shouldn't happen with proper data)
+        // Fallback: space matches evenly in this round
+        // This ensures the algorithm works even with incomplete or inconsistent data
         const idx = rounds[r].indexOf(match);
         const roundMatchSpacing = containerHeight / (rounds[r].length + 1);
         positions[match.id] = {
