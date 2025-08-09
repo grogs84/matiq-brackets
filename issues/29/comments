@@ -1,0 +1,115 @@
+Phase 1: Detailed Extraction Plan
+
+Objectives
+- Identify exactly what to extract and where it should live.
+- Minimize risk by keeping initial refactors no-op for ChampionshipBracket.
+- Clarify what remains bracket-specific for ConsolationBracket.
+
+Scope
+- In scope: Shared container, layout sizing, constants, positioning math, connection path helpers, validation, and shared types.
+- Out of scope: Consolation-specific double-elimination logic and match flow; new features.
+
+Proposed directory structure
+- src/bracket/
+  - constants.ts
+  - types.ts
+  - layout.ts        (responsive sizing, canvas dimensions)
+  - positions.ts     (match box coordinates, round spacing)
+  - connections.ts   (SVG path generation and anchor points)
+  - validation.ts    (coordinate bounds, finite checks, fallbacks)
+- src/components/bracket/
+  - BracketContainer.tsx (SVG wrapper and viewport/overflow handling)
+  - BracketLines.tsx     (optional: shared line rendering if feasible)
+- src/components/championship/
+  - ChampionshipBracket.tsx (refactor to use shared modules)
+- src/components/consolation/
+  - ConsolationBracket.tsx (will use shared modules later)
+- docs/
+  - brackets-architecture.md (overview and usage)
+
+Items to extract (with proposed APIs)
+- BracketContainer (src/components/bracket/BracketContainer.tsx)
+  - Props: width?, height?, viewBoxWidth, viewBoxHeight, className?, children
+  - Behavior: wraps responsive <svg>, sets viewBox and preserveAspectRatio, overflow scroll container, border/min sizes.
+- Constants (src/bracket/constants.ts)
+  - BRACKET_CONSTANTS: matchWidth, matchHeight, roundSpacing, verticalSpacing, padding, minCanvas, lineGutter
+  - BracketConfig: partial overrides of the above.
+- Types (src/bracket/types.ts)
+  - Dimensions { width: number; height: number }
+  - Point { x: number; y: number }
+  - MatchNode { id: string; roundIndex: number; matchIndex: number; ... }
+  - Round { index: number; matches: MatchNode[] }
+  - Connection { fromMatchId: string; toMatchId: string; fromAnchor?: 'left'|'right'|'top'|'bottom'; toAnchor?: same }
+- Layout (src/bracket/layout.ts)
+  - calculateResponsiveLayout(containerWidth: number, config: BracketConfig): { matchWidth; matchHeight; roundSpacing; verticalSpacing; padding }
+  - computeCanvasDimensions(rounds: Round[], config: BracketConfig): Dimensions
+- Positions (src/bracket/positions.ts)
+  - computeMatchPositions(rounds: Round[], config: BracketConfig): Record<MatchNode['id'], Point>
+  - getRoundX(roundIndex: number, config: BracketConfig): number
+  - getMatchY(roundIndex: number, matchIndex: number, config: BracketConfig): number
+- Connections (src/bracket/connections.ts)
+  - computeAnchors(matchBox: { x; y; w; h }, side: 'left'|'right'|'top'|'bottom'): Point
+  - pathBetween(a: Point, b: Point, style?: 'elbow'|'straight'|'curved', gutter?: number): string
+  - computeConnectionPaths(connections: Connection[], positions: Record<string, Point>, config: BracketConfig): Record<string, string>
+- Validation (src/bracket/validation.ts)
+  - isFiniteNumber(n: unknown): n is number
+  - clampToCanvas(pt: Point, dims: Dimensions, padding: number): Point
+  - ensureInBounds(rect: { x; y; w; h }, dims: Dimensions): { x; y; w; h }
+
+Areas requiring closer review
+- Connection logic differences: single-elimination vs. consolation (winner/loser transitions, cross-round joins).
+- Placement/seed rules for consolation rounds (affects matchIndex spacing and vertical alignment).
+- Path styles and routing: elbows vs. straight lines, crossing lines, avoiding overlaps.
+- Round spacing variability: consolation may require different roundSpacing/verticalSpacing defaults.
+- Data model parity: confirm that MatchNode/Round abstractions are sufficient for both brackets.
+
+Dependency and discovery tasks
+- Inventory current ChampionshipBracket internals
+  - List functions/constants currently embedded (e.g., dimension computation, position math, path builders, container behaviors).
+  - Note implicit assumptions (e.g., number of rounds, match height constants, anchor sides).
+- Identify what ConsolationBracket will need
+  - Which of the above are directly reusable vs. need extension points.
+
+Migration strategy (no-op for ChampionshipBracket)
+- Create shared modules by copying existing logic from ChampionshipBracket (do not generalize prematurely).
+- Refactor ChampionshipBracket to import from shared modules with zero visual/behavioral change.
+- Add light unit tests and a simple story to capture baseline layout.
+- Only after that, wire ConsolationBracket to shared modules.
+
+Testing strategy
+- Unit tests
+  - Layout: computeCanvasDimensions for sample round sets.
+  - Positions: getRoundX/getMatchY are deterministic for given config.
+  - Connections: pathBetween produces valid SVG path data for styles.
+  - Validation: clamps/in-bounds logic.
+- Visual tests
+  - Storybook stories for ChampionshipBracket (baseline) and for shared BracketContainer with mocked children.
+  - Optional: image snapshot on key stories to guard against regressions.
+- Runtime checks
+  - Development warnings when invalid coordinates or NaN are detected (guardrails in validation.ts).
+
+Acceptance criteria (Phase 1 complete when)
+- Detailed inventory of extractable code with mapping to proposed files is documented in the issue.
+- Proposed directory structure and APIs are agreed upon.
+- List of "needs review" items is confirmed, with decisions noted (generalize now vs. defer).
+- Updated scopes for issues #18, #19, #20, #21 reflecting use of shared modules and removing duplicated work.
+- A PR plan with boundaries is approved (but no code merged yet in Phase 1).
+
+Proposed PR breakdown (for later phases; for alignment now)
+- PR 1: Introduce src/bracket/types.ts and constants.ts; add minimal unit tests.
+- PR 2: Add BracketContainer and refactor ChampionshipBracket to use it (no visual change).
+- PR 3: Extract layout.ts and positions.ts; refactor ChampionshipBracket to use them; add tests/stories.
+- PR 4: Extract connections.ts and validation.ts; refactor line rendering; add tests.
+- PR 5 (optional): Shared BracketLines component if practical.
+
+Issue updates to prepare (once plan approved)
+- #18: Scope to SVG container and viewport specifics not covered by BracketContainer (if any).
+- #19: Focus on consolation-specific positioning and seeding rules; reuse positions.ts where possible.
+- #20: Rendering patterns: leverage BracketContainer and BracketLines; define what remains unique.
+- #21: Responsive behavior: rely on calculateResponsiveLayout; specify any consolation-only adjustments.
+
+Open questions to resolve in Phase 1
+- Do we need curved connection styles or only elbow/straight initially?
+- Is match box size fixed or responsive by container width breakpoints?
+- Do we need right-to-left support for some brackets?
+- What minimum browser support should constrain SVG/path features?
