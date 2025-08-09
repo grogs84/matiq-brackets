@@ -3,21 +3,10 @@ import { BRACKET_CONSTANTS, SVGBracketContainer } from './shared';
 import { 
   getMatchTextPositions, 
   getMatchRightEdgeCenter, 
-  calculateResponsiveLayout 
+  buildTournamentTree,
+  treeToRounds,
+  calculateTreeBasedLayout
 } from './shared';
-
-/**
- * Create lookup map for matches by ID
- * @param {Array} matches - Array of match objects  
- * @returns {Object} Map of match.id -> match object
- */
-const createMatchMap = (matches) => {
-  const matchMap = {};
-  matches.forEach(match => {
-    matchMap[match.id] = match;
-  });
-  return matchMap;
-};
 
 /**
  * Format participant display name with seed prefix
@@ -38,52 +27,6 @@ const formatParticipantName = (participant) => {
  */
 const isWinner = (match, participant) => {
   return match.winner && participant && match.winner === participant.name;
-};
-
-/**
- * Build championship bracket rounds using flat match structure
- * Works with database format using winner_next_match_id pointers
- */
-const buildRoundsFromTree = (matches) => {
-  const rounds = [];
-  const matchMap = createMatchMap(matches);
-  
-  // Find first round: matches with no winner_prev_match_id
-  const firstRound = matches.filter(match => 
-    !match.winner_prev_match_id && !match.loser_prev_match_id
-  );
-  
-  if (firstRound.length === 0) return rounds;
-  
-  rounds.push(firstRound);
-  
-  // Build subsequent rounds by following winner_next_match_id pointers
-  let currentRound = firstRound;
-  
-  while (currentRound.length > 1) {
-    const nextRound = [];
-    const processedMatches = new Set();
-    
-    currentRound.forEach(match => {
-      const nextMatchId = match.winner_next_match_id;
-      if (nextMatchId && !processedMatches.has(nextMatchId)) {
-        const nextMatch = matchMap[nextMatchId];
-        if (nextMatch) {
-          nextRound.push(nextMatch);
-          processedMatches.add(nextMatchId);
-        }
-      }
-    });
-    
-    if (nextRound.length > 0) {
-      rounds.push(nextRound);
-      currentRound = nextRound;
-    } else {
-      break; // Reached final
-    }
-  }
-  
-  return rounds;
 };
 
 /**
@@ -193,11 +136,12 @@ const ChampionshipBracket = ({
   matches = [],
   onMatchClick 
 }) => {
-  // Build rounds using tournament tree logic (database agnostic)
-  const rounds = buildRoundsFromTree(matches);
+  // Build stable tournament tree structure (input-order independent)
+  const tree = buildTournamentTree(matches);
+  const rounds = treeToRounds(tree);
 
-  // Calculate responsive layout based on available space
-  const layout = calculateResponsiveLayout(rounds);
+  // Calculate responsive layout using tree structure for stability
+  const layout = calculateTreeBasedLayout(tree);
   const { positions, dimensions, matchSize } = layout;
 
   // Calculate connecting lines between matches
