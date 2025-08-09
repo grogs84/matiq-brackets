@@ -8,6 +8,9 @@
 // Export the main bracket components
 export { default as ChampionshipBracket } from './ChampionshipBracket.jsx';
 
+// Export shared utilities and components
+export * from './shared';
+
 // Future exports for additional bracket types
 // export { default as ConsolationBracket } from './ConsolationBracket.jsx';
 // export { default as FullTournamentBracket } from './FullTournamentBracket.jsx';

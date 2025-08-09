@@ -7,7 +7,7 @@
 
 import React from 'react';
 import type { ReactNode } from 'react';
-import { SVG_STYLES } from '../constants';
+import { SVG_STYLES } from '../../constants';
 
 export interface SVGBracketContainerProps {
   /** SVG content to render inside the container */
