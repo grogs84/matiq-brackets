@@ -1,6 +1,6 @@
 import './App.css'
 import { ChampionshipBracket } from 'matiq-brackets'
-import { sampleChampionshipMatches, sampleMatchClickHandler } from '../../../sample-data/championship-bracket.js'
+import { sampleChampionshipMatches, sampleMatchClickHandler, sampleChampionshipBracket2 } from '../../../sample-data/championship-bracket.js'
 
 function App() {
 
@@ -20,7 +20,7 @@ function App() {
       <main className="container mx-auto px-4 py-8">
         <div className="bg-white rounded-lg shadow-lg p-6 max-h-[calc(150vh-200px)]">
           <ChampionshipBracket 
-            matches={sampleChampionshipMatches}
+            matches={sampleChampionshipBracket2}
             onMatchClick={sampleMatchClickHandler}
           />
         </div>
