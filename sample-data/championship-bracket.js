@@ -106,7 +106,7 @@ export const sampleMatchClickHandler = (match) => {
   alert(`Match: ${match.participants[0]?.name} vs ${match.participants[1]?.name}`)
 };
 
-export const sampleChampionshipBracket2 = [
+export const sampleChampionshipBracket3 = [
   {
     "id": "464a0d76-fdfc-427e-961c-d46b819f31c4",
     "participants": [
