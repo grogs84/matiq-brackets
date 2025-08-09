@@ -195,21 +195,10 @@ const ChampionshipBracket = ({
 }) => {
   // Build rounds using tournament tree logic (database agnostic)
   const rounds = buildRoundsFromTree(matches);
-  
-  // Debug: log the rounds structure
-  console.log('Rounds built:', rounds.map(round => round.length), rounds);
 
   // Calculate responsive layout based on available space
   const layout = calculateResponsiveLayout(rounds);
   const { positions, dimensions, matchSize } = layout;
-  
-  // Debug: log the positioning
-  console.log('Layout calculated:', { 
-    positions: Object.keys(positions).length, 
-    dimensions, 
-    matchSize,
-    firstFewPositions: Object.entries(positions).slice(0, 5)
-  });
 
   // Calculate connecting lines between matches
   const connectingLines = calculateConnectingLines(matches, positions, matchSize);

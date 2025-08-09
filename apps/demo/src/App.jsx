@@ -1,11 +1,8 @@
 import './App.css'
 import { ChampionshipBracket } from 'matiq-brackets'
-import { sampleChampionshipMatches, sampleMatchClickHandler, sampleChampionshipBracket2 } from '../../../sample-data/championship-bracket.js'
+import { sampleMatchClickHandler, sampleChampionshipBracket2 } from '../../../sample-data/championship-bracket.js'
 
 function App() {
-  // Debug: log the sample data structure
-  console.log('Sample matches:', sampleChampionshipMatches.slice(0, 5));
-
   return (
     <div className="min-h-screen bg-gray-100">
       <header className="bg-blue-900 text-white py-6">
@@ -22,7 +19,7 @@ function App() {
       <main className="container mx-auto px-4 py-8">
         <div className="bg-white rounded-lg shadow-lg p-6 max-h-[calc(150vh-200px)]">
           <ChampionshipBracket 
-            matches={sampleChampionshipMatches}
+            matches={sampleChampionshipBracket2}
             onMatchClick={sampleMatchClickHandler}
           />
         </div>
