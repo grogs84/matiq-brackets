@@ -33,3 +33,6 @@ packages/*/dist/
 
 *storybook.log
 storybook-static
+
+# Brackets directory - contains sample PDF files and images
+brackets/

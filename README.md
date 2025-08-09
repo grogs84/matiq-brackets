@@ -174,9 +174,7 @@ const match = {
 ## 📖 Documentation
 
 - [Component API Documentation](packages/matiq-brackets/README.md)
-- [Development Guide](COMPONENT_DESIGN.md) 
-- [Project Roadmap](ROADMAP.md)
-- [Reference Brackets](brackets/) - NCAA bracket PDFs for accuracy
+- [Development Guidelines](.github/copilot-instructions.md) - Detailed project structure and development approach
 
 ## 🤝 Contributing
 
