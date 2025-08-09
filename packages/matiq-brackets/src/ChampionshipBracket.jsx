@@ -1,4 +1,10 @@
 import React from 'react';
+import { BRACKET_CONSTANTS, SVGBracketContainer } from './shared';
+import { 
+  getMatchTextPositions, 
+  getMatchRightEdgeCenter, 
+  calculateResponsiveLayout 
+} from './shared';
 
 /**
  * Create lookup map for matches by ID
@@ -12,54 +18,6 @@ const createMatchMap = (matches) => {
   });
   return matchMap;
 };
-
-/**
- * Get right edge center point of a match box
- * @param {Object} position - Match position {x, y}
- * @param {Object} matchSize - Match dimensions {width, height}
- * @returns {Object} Right edge center coordinates {x, y}
- */
-const getMatchRightEdgeCenter = (position, matchSize) => ({
-  x: position.x + matchSize.width,
-  y: position.y + matchSize.height / 2
-});
-
-/**
- * Calculate text positions for match participants with enhanced layout for scores, seeds, and schools
- * @param {Object} position - Match position {x, y}
- * @param {Object} matchSize - Match dimensions {width, height}
- * @returns {Object} Text positions for participant1, participant2 with seeds inline and winner-based scoring
- */
-const getMatchTextPositions = (position, matchSize) => ({
-  participant1: {
-    seedAndName: {
-      x: position.x + 8, // Left-aligned seed and name
-      y: position.y + matchSize.height * 0.28
-    },
-    school: {
-      x: position.x + 8, // Left-aligned school
-      y: position.y + matchSize.height * 0.42
-    },
-    score: {
-      x: position.x + matchSize.width - 8, // Right-aligned score (only for winner)
-      y: position.y + matchSize.height * 0.28
-    }
-  },
-  participant2: {
-    seedAndName: {
-      x: position.x + 8, // Left-aligned seed and name
-      y: position.y + matchSize.height * 0.68
-    },
-    school: {
-      x: position.x + 8, // Left-aligned school
-      y: position.y + matchSize.height * 0.82
-    },
-    score: {
-      x: position.x + matchSize.width - 8, // Right-aligned score (only for winner)
-      y: position.y + matchSize.height * 0.68
-    }
-  }
-});
 
 /**
  * Format participant display name with seed prefix
@@ -80,107 +38,6 @@ const formatParticipantName = (participant) => {
  */
 const isWinner = (match, participant) => {
   return match.winner && participant && match.winner === participant.name;
-};
-
-/**
- * Wrestling bracket layout constants
- */
-const BRACKET_CONSTANTS = {
-  DEFAULT_CONTAINER_HEIGHT: 1200,  // Base height for tournament layout calculations
-  DEFAULT_PADDING: 60,             // Standard padding around bracket edges
-  MIN_MATCH_WIDTH: 220,            // Match box width for wrestler names, seeds, schools (increased)
-  MIN_MATCH_HEIGHT: 110,           // Match box height for two participants + scores (increased)
-  MIN_SPACING: 50,                 // Minimum vertical space between matches (increased)
-  LEFT_MARGIN: 30,                 // Distance from left edge to first round
-  ROUND_SPACING: 260,              // Horizontal distance between tournament rounds (increased)
-  BOTTOM_PADDING_EXTRA: 40,        // Additional bottom padding for scroll visibility
-  MIN_HORIZONTAL_EXTENSION: 20,    // Minimum length for connecting line extensions
-  HORIZONTAL_EXTENSION_RATIO: 0.4, // Fraction of gap used for line extensions
-  LINE_STROKE_WIDTH: 2,            // Thickness of bracket connecting lines
-  FIRST_MATCH_TOP_MARGIN: 100       // Y position offset for first match placement
-};
-
-/**
- * Calculate responsive tournament tree dimensions and positions
- * @param {Array} rounds - Array of round arrays containing matches
- * @param {Object} options - Sizing options {containerWidth, containerHeight, padding}
- */
-const calculateResponsiveLayout = (rounds, options = {}) => {
-  if (rounds.length === 0) return { positions: {}, dimensions: { width: 400, height: 300 } };
-
-  // Default options with larger container for better initial layout
-  const {
-    containerHeight = BRACKET_CONSTANTS.DEFAULT_CONTAINER_HEIGHT,
-    padding = BRACKET_CONSTANTS.DEFAULT_PADDING,
-    minMatchWidth = BRACKET_CONSTANTS.MIN_MATCH_WIDTH,
-    minMatchHeight = BRACKET_CONSTANTS.MIN_MATCH_HEIGHT,
-    minSpacing = BRACKET_CONSTANTS.MIN_SPACING
-  } = options;
-
-  // Calculate spacing between rounds with more horizontal space
-  // Move first round closer to left and increase spacing between rounds
-  const leftMargin = BRACKET_CONSTANTS.LEFT_MARGIN;
-  const roundSpacing = BRACKET_CONSTANTS.ROUND_SPACING;
-
-  const positions = {};
-
-  // First round: evenly spaced vertically
-const firstRound = rounds[0];
-if (firstRound.length > 0) {
-  const firstRoundSpacing = Math.max(minMatchHeight + minSpacing, containerHeight / (firstRound.length + 1));
-  
-  firstRound.forEach((match, i) => {
-    positions[match.id] = {
-      x: leftMargin,
-      y: BRACKET_CONSTANTS.FIRST_MATCH_TOP_MARGIN + (i * firstRoundSpacing)  // Start at 140px, use i instead of (i + 1)
-    };
-  });
-}
-
-  // Subsequent rounds: center each match between its source matches
-  for (let r = 1; r < rounds.length; r++) {
-    rounds[r].forEach((match) => {
-      // Extract previous match IDs from the flat database structure
-      const prevMatch1 = match.winner_prev_match_id;
-      const prevMatch2 = match.loser_prev_match_id;
-      
-      if (prevMatch1 && prevMatch2 && positions[prevMatch1] && positions[prevMatch2]) {
-        // Position this match at the midpoint between its two source matches
-        const y1 = positions[prevMatch1].y;
-        const y2 = positions[prevMatch2].y;
-        const centerY = (y1 + y2) / 2;
-        
-        positions[match.id] = {
-          x: leftMargin + r * roundSpacing,
-          y: centerY
-        };
-      } else {
-        // Fallback: space matches evenly in this round (shouldn't happen with proper data)
-        const idx = rounds[r].indexOf(match);
-        const roundMatchSpacing = containerHeight / (rounds[r].length + 1);
-        positions[match.id] = {
-          x: leftMargin + r * roundSpacing,
-          y: padding + (idx + 1) * roundMatchSpacing
-        };
-      }
-    });
-  }
-
-  // Calculate final dimensions based on content
-  const maxX = Math.max(...Object.values(positions).map(p => p.x)) + minMatchWidth + padding;
-  const maxY = Math.max(...Object.values(positions).map(p => p.y)) + minMatchHeight + padding + BRACKET_CONSTANTS.BOTTOM_PADDING_EXTRA;
-  
-  return {
-    positions,
-    dimensions: {
-      width: Math.max(600, maxX),
-      height: Math.max(400, maxY)
-    },
-    matchSize: {
-      width: minMatchWidth,
-      height: minMatchHeight
-    }
-  };
 };
 
 /**
@@ -369,147 +226,137 @@ const ChampionshipBracket = ({
   };
 
   return (
-    <div className="championship-bracket w-full">
-      <h3 className="text-lg font-bold mb-4">Championship Bracket</h3>
-      <div className="w-full overflow-x-auto overflow-y-auto max-h-[calc(100vh-200px)]">
-        <svg 
-          viewBox={`0 0 ${finalDimensions.width} ${finalDimensions.height}`}
-          preserveAspectRatio="xMinYMin meet"
-          className="w-full border border-gray-300"
-          style={{ height: `${finalDimensions.height}px`, minHeight: '400px' }}
-        >
-          {/* <text 
-            x={finalDimensions.width / 2} 
-            y="30" 
-            textAnchor="middle" 
-            className="text-lg font-bold fill-current"
-          >
-            Championship
-          </text> */}
+    <SVGBracketContainer
+      title="Championship Bracket"
+      viewBox={{
+        x: 0,
+        y: 0,
+        width: finalDimensions.width,
+        height: finalDimensions.height
+      }}
+      svgStyle={{ height: `${finalDimensions.height}px`, minHeight: '400px' }}
+    >
+      {/* Connecting lines - drawn first so they appear behind matches */}
+      {connectingLines
+        .filter(line => 
+          !isNaN(line.x1) && !isNaN(line.y1) && 
+          !isNaN(line.x2) && !isNaN(line.y2)
+        )
+        .map((line) => (
+          <line
+            key={line.id}
+            x1={line.x1}
+            y1={line.y1}
+            x2={line.x2}
+            y2={line.y2}
+            stroke="#d1d5db"
+            strokeWidth={BRACKET_CONSTANTS.LINE_STROKE_WIDTH}
+            className="opacity-60"
+          />
+        ))
+      }
+      
+      {/* Match boxes - drawn on top of lines */}
+      {rounds.map((roundMatches) =>
+        roundMatches.map((match) => {
+          const pos = positions[match.id];
+          if (!pos || isNaN(pos.x) || isNaN(pos.y)) return null; // Skip invalid positions
           
-          {/* Connecting lines - drawn first so they appear behind matches */}
-          {connectingLines
-            .filter(line => 
-              !isNaN(line.x1) && !isNaN(line.y1) && 
-              !isNaN(line.x2) && !isNaN(line.y2)
-            )
-            .map((line) => (
-              <line
-                key={line.id}
-                x1={line.x1}
-                y1={line.y1}
-                x2={line.x2}
-                y2={line.y2}
-                stroke="#d1d5db"
-                strokeWidth={BRACKET_CONSTANTS.LINE_STROKE_WIDTH}
-                className="opacity-60"
+          const textPositions = getMatchTextPositions(pos, matchSize);
+          
+          return (
+            <g key={match.id}>
+              <rect
+                x={pos.x}
+                y={pos.y}
+                width={matchSize.width}
+                height={matchSize.height}
+                fill="white"
+                stroke="black"
+                strokeWidth="1.5"
+                rx="3"
+                ry="3"
+                className={onMatchClick ? "cursor-pointer hover:fill-blue-50 hover:stroke-blue-400" : ""}
+                onClick={() => onMatchClick?.(match)}
               />
-            ))
-          }
-          
-          {/* Match boxes - drawn on top of lines */}
-          {rounds.map((roundMatches) =>
-            roundMatches.map((match) => {
-              const pos = positions[match.id];
-              if (!pos || isNaN(pos.x) || isNaN(pos.y)) return null; // Skip invalid positions
               
-              const textPositions = getMatchTextPositions(pos, matchSize);
+              {/* Participant 1 */}
+              <text 
+                x={textPositions.participant1.seedAndName.x} 
+                y={textPositions.participant1.seedAndName.y} 
+                textAnchor="start" 
+                className="text-sm font-semibold fill-current pointer-events-none"
+                style={{ dominantBaseline: 'middle' }}
+              >
+                {formatParticipantName(match.participants[0])}
+              </text>
+              <text 
+                x={textPositions.participant1.school.x} 
+                y={textPositions.participant1.school.y} 
+                textAnchor="start" 
+                className="text-xs text-gray-600 fill-current pointer-events-none"
+                style={{ dominantBaseline: 'middle' }}
+              >
+                {match.participants[0]?.school || ''}
+              </text>
+              {isWinner(match, match.participants[0]) && match.score && (
+                <text 
+                  x={textPositions.participant1.score.x} 
+                  y={textPositions.participant1.score.y} 
+                  textAnchor="end" 
+                  className="text-xs font-medium text-green-700 fill-current pointer-events-none"
+                  style={{ dominantBaseline: 'middle' }}
+                >
+                  {match.score}
+                </text>
+              )}
               
-              return (
-                <g key={match.id}>
-                  <rect
-                    x={pos.x}
-                    y={pos.y}
-                    width={matchSize.width}
-                    height={matchSize.height}
-                    fill="white"
-                    stroke="black"
-                    strokeWidth="1.5"
-                    rx="3"
-                    ry="3"
-                    className={onMatchClick ? "cursor-pointer hover:fill-blue-50 hover:stroke-blue-400" : ""}
-                    onClick={() => onMatchClick?.(match)}
-                  />
-                  
-                  {/* Participant 1 */}
-                  <text 
-                    x={textPositions.participant1.seedAndName.x} 
-                    y={textPositions.participant1.seedAndName.y} 
-                    textAnchor="start" 
-                    className="text-sm font-semibold fill-current pointer-events-none"
-                    style={{ dominantBaseline: 'middle' }}
-                  >
-                    {formatParticipantName(match.participants[0])}
-                  </text>
-                  <text 
-                    x={textPositions.participant1.school.x} 
-                    y={textPositions.participant1.school.y} 
-                    textAnchor="start" 
-                    className="text-xs text-gray-600 fill-current pointer-events-none"
-                    style={{ dominantBaseline: 'middle' }}
-                  >
-                    {match.participants[0]?.school || ''}
-                  </text>
-                  {isWinner(match, match.participants[0]) && match.score && (
-                    <text 
-                      x={textPositions.participant1.score.x} 
-                      y={textPositions.participant1.score.y} 
-                      textAnchor="end" 
-                      className="text-xs font-medium text-green-700 fill-current pointer-events-none"
-                      style={{ dominantBaseline: 'middle' }}
-                    >
-                      {match.score}
-                    </text>
-                  )}
-                  
-                  {/* Participant 2 */}
-                  <text 
-                    x={textPositions.participant2.seedAndName.x} 
-                    y={textPositions.participant2.seedAndName.y} 
-                    textAnchor="start" 
-                    className="text-sm font-semibold fill-current pointer-events-none"
-                    style={{ dominantBaseline: 'middle' }}
-                  >
-                    {formatParticipantName(match.participants[1])}
-                  </text>
-                  <text 
-                    x={textPositions.participant2.school.x} 
-                    y={textPositions.participant2.school.y} 
-                    textAnchor="start" 
-                    className="text-xs text-gray-600 fill-current pointer-events-none"
-                    style={{ dominantBaseline: 'middle' }}
-                  >
-                    {match.participants[1]?.school || ''}
-                  </text>
-                  {isWinner(match, match.participants[1]) && match.score && (
-                    <text 
-                      x={textPositions.participant2.score.x} 
-                      y={textPositions.participant2.score.y} 
-                      textAnchor="end" 
-                      className="text-xs font-medium text-green-700 fill-current pointer-events-none"
-                      style={{ dominantBaseline: 'middle' }}
-                    >
-                      {match.score}
-                    </text>
-                  )}
-                  
-                  {/* Separator line between participants */}
-                  <line
-                    x1={pos.x + 4}
-                    y1={pos.y + matchSize.height / 2}
-                    x2={pos.x + matchSize.width - 4}
-                    y2={pos.y + matchSize.height / 2}
-                    stroke="#e5e7eb"
-                    strokeWidth="1"
-                    className="opacity-50"
-                  />
-                </g>
-              );
-            })
-          )}
-        </svg>
-      </div>
-    </div>
+              {/* Participant 2 */}
+              <text 
+                x={textPositions.participant2.seedAndName.x} 
+                y={textPositions.participant2.seedAndName.y} 
+                textAnchor="start" 
+                className="text-sm font-semibold fill-current pointer-events-none"
+                style={{ dominantBaseline: 'middle' }}
+              >
+                {formatParticipantName(match.participants[1])}
+              </text>
+              <text 
+                x={textPositions.participant2.school.x} 
+                y={textPositions.participant2.school.y} 
+                textAnchor="start" 
+                className="text-xs text-gray-600 fill-current pointer-events-none"
+                style={{ dominantBaseline: 'middle' }}
+              >
+                {match.participants[1]?.school || ''}
+              </text>
+              {isWinner(match, match.participants[1]) && match.score && (
+                <text 
+                  x={textPositions.participant2.score.x} 
+                  y={textPositions.participant2.score.y} 
+                  textAnchor="end" 
+                  className="text-xs font-medium text-green-700 fill-current pointer-events-none"
+                  style={{ dominantBaseline: 'middle' }}
+                >
+                  {match.score}
+                </text>
+              )}
+              
+              {/* Separator line between participants */}
+              <line
+                x1={pos.x + 4}
+                y1={pos.y + matchSize.height / 2}
+                x2={pos.x + matchSize.width - 4}
+                y2={pos.y + matchSize.height / 2}
+                stroke="#e5e7eb"
+                strokeWidth="1"
+                className="opacity-50"
+              />
+            </g>
+          );
+        })
+      )}
+    </SVGBracketContainer>
   );
 };
 
