@@ -7,7 +7,7 @@
 
 // Export the main bracket components
 export { default as ChampionshipBracket } from './ChampionshipBracket.jsx';
-export { ConsolationBracket } from './components';
+export { default as ConsolationBracket } from './ConsolationBracket.jsx';
 
 // Export shared utilities and components
 export * from './shared';

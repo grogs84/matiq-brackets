@@ -64,7 +64,7 @@ function App() {
         </div>
         
         {/* Second Championship Bracket for DFS testing */}
-        <div>
+        {/* <div>
           <h2 className="text-xl font-bold mb-4">Championship Bracket (Unordered Data - DFS Fix Applied)</h2>
           <div className="bg-white rounded-lg shadow-lg p-6 max-h-[calc(75vh-100px)]">
             <ChampionshipBracket 
@@ -72,7 +72,7 @@ function App() {
               onMatchClick={sampleMatchClickHandler}
             />
           </div>
-        </div>
+        </div> */}
       </main>
     </div>
   )

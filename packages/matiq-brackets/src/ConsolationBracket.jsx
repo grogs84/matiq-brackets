@@ -8,29 +8,8 @@
  */
 
 import React from 'react';
-import { SVGBracketContainer } from '../shared/components/SVGBracketContainer';
-import { BRACKET_CONSTANTS } from '../shared/constants';
-import type { 
-  Match, 
-  MatchClickHandler,
-  Dimensions 
-} from '../shared/types';
-
-/**
- * Props interface for ConsolationBracket component
- */
-export interface ConsolationBracketProps {
-  /** Array of consolation match data */
-  matches?: Match[];
-  /** Optional callback function when a match is clicked */
-  onMatchClick?: MatchClickHandler;
-  /** Custom width for the bracket */
-  width?: number;
-  /** Custom height for the bracket */
-  height?: number;
-  /** Additional CSS classes for styling */
-  className?: string;
-}
+import { SVGBracketContainer } from './shared/components/SVGBracketContainer';
+import { BRACKET_CONSTANTS } from './shared/constants';
 
 /**
  * ConsolationBracket component renders the basic structure for wrestling consolation brackets
@@ -38,7 +17,7 @@ export interface ConsolationBracketProps {
  * Currently displays placeholder structure with proper SVG container integration.
  * Future phases will add full consolation bracket positioning logic.
  */
-export const ConsolationBracket: React.FC<ConsolationBracketProps> = ({
+const ConsolationBracket = ({
   matches = [],
   onMatchClick,
   width,
@@ -46,7 +25,7 @@ export const ConsolationBracket: React.FC<ConsolationBracketProps> = ({
   className
 }) => {
   // Calculate basic dimensions using bracket constants
-  const defaultDimensions: Dimensions = {
+  const defaultDimensions = {
     width: width || Math.max(600, BRACKET_CONSTANTS.DEFAULT_PADDING * 10),
     height: height || Math.max(400, BRACKET_CONSTANTS.DEFAULT_CONTAINER_HEIGHT / 2)
   };

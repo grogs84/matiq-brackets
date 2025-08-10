@@ -1,26 +1,23 @@
 import type { Meta, StoryObj } from '@storybook/react';
+import React from 'react';
 import { ChampionshipBracket } from 'matiq-brackets';
-import { sampleChampionshipMatches, sampleMatchClickHandler } from '../../../../sample-data/championship-bracket.js';
+import { sampleChampionshipMatches, sampleChampionshipBracket3, sampleMatchClickHandler } from '../../../../sample-data/championship-bracket.js';
 
 const meta: Meta<typeof ChampionshipBracket> = {
   title: 'Wrestling Brackets/ChampionshipBracket',
   component: ChampionshipBracket,
   parameters: {
     layout: 'fullscreen',
-    docs: {
-      description: {
-        component: 'A championship bracket component for wrestling tournaments. Displays the single-elimination bracket with embedded participant data, connecting lines, and interactive match cards.',
-      },
-    },
   },
   argTypes: {
     matches: {
-      description: 'Array of match objects with embedded participant data',
+      description: 'Array of championship match objects with embedded participant data',
       control: { type: 'object' },
     },
     onMatchClick: {
       description: 'Optional callback function when a match is clicked',
-      control: { type: 'function' },
+      control: false, // Functions can't be controlled in Storybook UI
+      action: 'match-clicked', // This will log clicks in the Actions panel
     },
   },
   tags: ['autodocs'],
@@ -29,7 +26,47 @@ const meta: Meta<typeof ChampionshipBracket> = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const FullTournament: Story = {
+export const Default: Story = {
+  args: {
+    matches: sampleChampionshipMatches,
+    onMatchClick: sampleMatchClickHandler,
+  },
+};
+
+export const MinimalStyling: Story = {
+  args: {
+    matches: sampleChampionshipMatches,
+    onMatchClick: sampleMatchClickHandler,
+  },
+  render: (args) => {
+    return React.createElement('div', {
+      style: { 
+        padding: '20px', 
+        backgroundColor: '#f5f5f5',
+        minHeight: '100vh'
+      }
+    }, [
+      React.createElement('h3', { 
+        key: 'title',
+        style: { marginBottom: '10px', color: '#333' } 
+      }, 'Minimal Container Styling'),
+      React.createElement(ChampionshipBracket, { 
+        key: 'bracket', 
+        matches: args.matches,
+        onMatchClick: args.onMatchClick
+      })
+    ]);
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: 'Championship bracket with minimal container styling to isolate component design from demo app layout.',
+      },
+    },
+  },
+};
+
+export const NakedComponent: Story = {
   args: {
     matches: sampleChampionshipMatches,
     onMatchClick: sampleMatchClickHandler,
@@ -37,83 +74,73 @@ export const FullTournament: Story = {
   parameters: {
     docs: {
       description: {
-        story: 'Complete 32-wrestler championship bracket with all rounds from first round to finals.',
+        story: 'Pure component with no container styling - shows raw component design.',
       },
     },
   },
 };
 
-// Create smaller tournament scenarios
-const finalOnlyMatches = sampleChampionshipMatches.filter(match => match.id === 'r5m1');
-const semifinalsAndFinal = sampleChampionshipMatches.filter(match => match.id.startsWith('r4') || match.id.startsWith('r5'));
-
-export const FinalOnly: Story = {
+export const UnorderedDataTest: Story = {
   args: {
-    matches: finalOnlyMatches,
+    matches: sampleChampionshipBracket3,
     onMatchClick: sampleMatchClickHandler,
+  },
+  render: (args) => {
+    return React.createElement('div', {
+      style: { 
+        padding: '10px',
+        backgroundColor: 'white',
+        border: '1px solid #ddd'
+      }
+    }, [
+      React.createElement('h3', { 
+        key: 'title',
+        style: { color: '#d63384', marginBottom: '10px' } 
+      }, 'Unordered Data (Testing Positioning Algorithm)'),
+      React.createElement(ChampionshipBracket, { 
+        key: 'bracket', 
+        matches: args.matches,
+        onMatchClick: args.onMatchClick
+      })
+    ]);
   },
   parameters: {
     docs: {
       description: {
-        story: 'Shows just the final match - useful for testing single match display.',
+        story: 'Tests component with unordered match data to verify tournament tree positioning works correctly.',
       },
     },
   },
 };
 
-export const SemifinalsAndFinal: Story = {
-  args: {
-    matches: semifinalsAndFinal,
-    onMatchClick: sampleMatchClickHandler,
-  },
-  parameters: {
-    docs: {
-      description: {
-        story: 'Shows semifinals and final matches - demonstrates multi-round bracket display.',
-      },
-    },
-  },
-};
-
-export const WithoutClickHandler: Story = {
+export const OrderedDataComparison: Story = {
   args: {
     matches: sampleChampionshipMatches,
-    // No onMatchClick provided to test optional behavior
-  },
-  parameters: {
-    docs: {
-      description: {
-        story: 'Full tournament without click handler - matches are not interactive.',
-      },
-    },
-  },
-};
-
-// Test edge cases
-const edgeCaseMatches = [
-  {
-    id: "test1",
-    participants: [
-      { name: "Very Long Wrestler Name That Might Overflow", seed: 1, school: "University with an Extremely Long Name" },
-      { name: "", seed: null, school: "" }
-    ],
-    winner: "Very Long Wrestler Name That Might Overflow",
-    score: "Fall 1:23",
-    winner_next_match_id: null,
-    winner_prev_match_id: null,
-    loser_prev_match_id: null
-  }
-];
-
-export const EdgeCases: Story = {
-  args: {
-    matches: edgeCaseMatches,
     onMatchClick: sampleMatchClickHandler,
   },
+  render: (args) => {
+    return React.createElement('div', {
+      style: { 
+        padding: '10px',
+        backgroundColor: 'white',
+        border: '1px solid #ddd'
+      }
+    }, [
+      React.createElement('h3', { 
+        key: 'title',
+        style: { color: '#198754', marginBottom: '10px' } 
+      }, 'Ordered Data (Expected to Work)'),
+      React.createElement(ChampionshipBracket, { 
+        key: 'bracket', 
+        matches: args.matches,
+        onMatchClick: args.onMatchClick
+      })
+    ]);
+  },
   parameters: {
     docs: {
       description: {
-        story: 'Tests edge cases like long names, missing data, and text overflow handling.',
+        story: 'Baseline test with properly ordered match data for comparison.',
       },
     },
   },
