@@ -1,21 +1,28 @@
 /**
- * ConsolationBracket - Foundational component structure for consolation bracket visualization
+ * ConsolationBracket - Renders responsive consolation bracket matches
  * 
- * This component provides the basic structure and integration with shared utilities
- * following the same patterns proven successful in ChampionshipBracket.
+ * Uses shared utilities and components to maintain consistency with ChampionshipBracket
+ * while implementing consolation-specific positioning and flow patterns.
  * 
- * Phase 2a: Basic component structure without full bracket logic.
+ * Expects matches with embedded participant data:
+ * match.participants[0/1] = { id, name, seed, school, ... }
  */
 
 import React from 'react';
-import { SVGBracketContainer } from './shared/components/SVGBracketContainer';
-import { BRACKET_CONSTANTS } from './shared/constants';
+import { SVGBracketContainer, MatchBox } from './shared/components';
+import { 
+  buildConsolationRoundsFromTree,
+  calculateConsolationLayout,
+  calculateConsolationConnectingLines,
+  renderConnectingLines,
+  calculateSafeDimensions
+} from './shared/utils';
 
 /**
- * ConsolationBracket component renders the basic structure for wrestling consolation brackets
+ * ConsolationBracket component renders wrestling consolation brackets
  * 
- * Currently displays placeholder structure with proper SVG container integration.
- * Future phases will add full consolation bracket positioning logic.
+ * Now includes full bracket positioning logic using shared utilities for 
+ * consistent styling and behavior with ChampionshipBracket.
  */
 const ConsolationBracket = ({
   matches = [],
@@ -24,18 +31,68 @@ const ConsolationBracket = ({
   height,
   className
 }) => {
-  // Calculate basic dimensions using bracket constants
-  const defaultDimensions = {
-    width: width || Math.max(600, BRACKET_CONSTANTS.DEFAULT_PADDING * 10),
-    height: height || Math.max(400, BRACKET_CONSTANTS.DEFAULT_CONTAINER_HEIGHT / 2)
-  };
+  // Build rounds using shared consolation bracket logic
+  const rounds = buildConsolationRoundsFromTree(matches);
+  
+  // DEBUG: Log the consolation bracket structure
+  console.log('🔍 DEBUGGING ConsolationBracket:');
+  console.log('Total matches:', matches.length);
+  console.log('Sample match structure:', {
+    id: matches[0]?.id,
+    winner_next: matches[0]?.winner_next_match_id,
+    winner_prev: matches[0]?.winner_prev_match_id, 
+    loser_prev: matches[0]?.loser_prev_match_id
+  });
+  console.log('Consolation rounds built:', rounds.map(r => r.length));
 
-  // For now, show basic placeholder structure
-  // Future implementation will include full bracket positioning logic
-  const placeholderWidth = BRACKET_CONSTANTS.MIN_MATCH_WIDTH;
-  const placeholderHeight = BRACKET_CONSTANTS.MIN_MATCH_HEIGHT;
-  const centerX = defaultDimensions.width / 2 - placeholderWidth / 2;
-  const centerY = defaultDimensions.height / 2 - placeholderHeight / 2;
+  // If no matches provided, show empty state
+  if (matches.length === 0) {
+    const emptyDimensions = {
+      width: width || 600,
+      height: height || 400
+    };
+    
+    return (
+      <div className={className}>
+        <SVGBracketContainer
+          title="Consolation Bracket"
+          viewBox={{
+            x: 0,
+            y: 0,
+            width: emptyDimensions.width,
+            height: emptyDimensions.height
+          }}
+          svgStyle={{ 
+            height: `${emptyDimensions.height}px`, 
+            minHeight: '400px' 
+          }}
+        >
+          <text
+            x={emptyDimensions.width / 2}
+            y={emptyDimensions.height / 2}
+            textAnchor="middle"
+            className="text-lg font-medium fill-gray-500"
+            style={{ dominantBaseline: 'middle' }}
+          >
+            No consolation matches provided
+          </text>
+        </SVGBracketContainer>
+      </div>
+    );
+  }
+
+  // Calculate responsive layout for consolation bracket using shared utilities
+  const layout = calculateConsolationLayout(rounds, {
+    containerWidth: width,
+    containerHeight: height
+  });
+  const { positions, dimensions, matchSize } = layout;
+
+  // Calculate connecting lines using consolation-specific logic
+  const connectingLines = calculateConsolationConnectingLines(matches, positions, matchSize);
+
+  // Calculate safe final dimensions using shared utility
+  const finalDimensions = calculateSafeDimensions(positions, matchSize, connectingLines);
 
   return (
     <div className={className}>
@@ -44,60 +101,33 @@ const ConsolationBracket = ({
         viewBox={{
           x: 0,
           y: 0,
-          width: defaultDimensions.width,
-          height: defaultDimensions.height
+          width: finalDimensions.width,
+          height: finalDimensions.height
         }}
         svgStyle={{ 
-          height: `${defaultDimensions.height}px`, 
+          height: `${finalDimensions.height}px`, 
           minHeight: '400px' 
         }}
       >
-        {/* Placeholder structure - will be replaced with actual bracket logic */}
-        <rect
-          x={centerX}
-          y={centerY}
-          width={placeholderWidth}
-          height={placeholderHeight}
-          fill="white"
-          stroke="#d1d5db"
-          strokeWidth="2"
-          strokeDasharray="5,5"
-          rx="3"
-          ry="3"
-        />
+        {/* Connecting lines - drawn first so they appear behind matches */}
+        {renderConnectingLines(connectingLines)}
         
-        {/* Placeholder text */}
-        <text
-          x={centerX + placeholderWidth / 2}
-          y={centerY + placeholderHeight / 2 - 10}
-          textAnchor="middle"
-          className="text-sm font-medium fill-gray-500"
-          style={{ dominantBaseline: 'middle' }}
-        >
-          Consolation Bracket
-        </text>
-        
-        <text
-          x={centerX + placeholderWidth / 2}
-          y={centerY + placeholderHeight / 2 + 10}
-          textAnchor="middle"
-          className="text-xs fill-gray-400"
-          style={{ dominantBaseline: 'middle' }}
-        >
-          {matches.length > 0 ? `${matches.length} matches` : 'No matches provided'}
-        </text>
-        
-        {/* Show basic match count and interaction capability */}
-        {matches.length > 0 && (
-          <text
-            x={centerX + placeholderWidth / 2}
-            y={centerY + placeholderHeight / 2 + 30}
-            textAnchor="middle"
-            className="text-xs fill-gray-400"
-            style={{ dominantBaseline: 'middle' }}
-          >
-            {onMatchClick ? 'Click handler enabled' : 'No click handler'}
-          </text>
+        {/* Match boxes - drawn on top of lines using shared MatchBox component */}
+        {rounds.map((roundMatches) =>
+          roundMatches.map((match) => {
+            const pos = positions[match.id];
+            if (!pos || isNaN(pos.x) || isNaN(pos.y)) return null; // Skip invalid positions
+            
+            return (
+              <MatchBox
+                key={match.id}
+                match={match}
+                position={pos}
+                matchSize={matchSize}
+                onMatchClick={onMatchClick}
+              />
+            );
+          })
         )}
       </SVGBracketContainer>
     </div>
