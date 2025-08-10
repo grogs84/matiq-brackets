@@ -86,7 +86,7 @@ const ConsolationBracket = ({
     containerWidth: width,
     containerHeight: height
   });
-  const { positions, dimensions, matchSize } = layout;
+  const { positions, matchSize } = layout;
 
   // Calculate connecting lines using consolation-specific logic
   const connectingLines = calculateConsolationConnectingLines(matches, positions, matchSize);

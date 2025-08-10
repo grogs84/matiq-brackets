@@ -34,7 +34,7 @@ const ChampionshipBracket = ({
 
   // Calculate responsive layout based on available space
   const layout = calculateResponsiveLayout(rounds);
-  const { positions, dimensions, matchSize } = layout;
+  const { positions, matchSize } = layout;
 
   // Calculate connecting lines between matches using shared utilities
   const connectingLines = calculateChampionshipConnectingLines(matches, positions, matchSize);
