@@ -1,6 +1,6 @@
 import './App.css'
 import { ChampionshipBracket } from 'matiq-brackets'
-import { sampleChampionshipMatches, sampleMatchClickHandler } from '../../../sample-data/championship-bracket.js'
+import { sampleChampionshipMatches, sampleMatchClickHandler, sampleChampionshipBracket2 } from '../../../sample-data/championship-bracket.js'
 
 function App() {
 
@@ -12,17 +12,29 @@ function App() {
             Wrestling Bracket Development
           </h1>
           <p className="text-center text-blue-200 mt-2">
-            Starting fresh - building step by step
+            Testing DFS positioning fix - ordered vs unordered data
           </p>
         </div>
       </header>
 
       <main className="container mx-auto px-4 py-8">
-        <div className="bg-white rounded-lg shadow-lg p-6 max-h-[calc(150vh-200px)]">
-          <ChampionshipBracket 
-            matches={sampleChampionshipMatches}
-            onMatchClick={sampleMatchClickHandler}
-          />
+        <div className="mb-8">
+          <h2 className="text-xl font-bold mb-4">Ordered Data (Original)</h2>
+          <div className="bg-white rounded-lg shadow-lg p-6 max-h-[calc(150vh-200px)]">
+            <ChampionshipBracket 
+              matches={sampleChampionshipMatches}
+              onMatchClick={sampleMatchClickHandler}
+            />
+          </div>
+        </div>
+        <div>
+          <h2 className="text-xl font-bold mb-4">Unordered Data (DFS Fix Applied)</h2>
+          <div className="bg-white rounded-lg shadow-lg p-6 max-h-[calc(150vh-200px)]">
+            <ChampionshipBracket 
+              matches={sampleChampionshipBracket2}
+              onMatchClick={sampleMatchClickHandler}
+            />
+          </div>
         </div>
       </main>
     </div>
