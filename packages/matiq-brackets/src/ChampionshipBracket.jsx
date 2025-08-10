@@ -195,6 +195,21 @@ const ChampionshipBracket = ({
 }) => {
   // Build rounds using tournament tree logic (database agnostic)
   const rounds = buildRoundsFromTree(matches);
+  // DEBUG: Log the data structure we're working with
+  console.log('🔍 DEBUGGING UnorderedDataTest:');
+  console.log('Total matches:', matches.length);
+  console.log('Sample match structure:', {
+    id: matches[0]?.id,
+    winner_next: matches[0]?.winner_next_match_id,
+    winner_prev: matches[0]?.winner_prev_match_id, 
+    loser_prev: matches[0]?.loser_prev_match_id
+  });
+  console.log('Rounds built:', rounds.map(r => r.length));
+  console.log('Final match (should have no winner_next):', 
+    matches.find(m => !m.winner_next_match_id)?.id
+  );
+
+
 
   // Calculate responsive layout based on available space
   const layout = calculateResponsiveLayout(rounds);

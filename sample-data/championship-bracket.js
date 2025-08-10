@@ -107,28 +107,30 @@ export const sampleMatchClickHandler = (match) => {
 };
 
 export const sampleChampionshipBracket3 = [
-  {
-    "id": "464a0d76-fdfc-427e-961c-d46b819f31c4",
-    "participants": [
-      {
-        "name": "shane gentry",
-        "seed": null,
-        "school": "maryland"
-      },
-      {
-        "name": "jarrod patterson",
-        "seed": 7,
-        "school": "oklahoma"
-      }
-    ],
-    "winner": "jarrod patterson",
-    "score": "9-0",
-    "winner_next_match_id": "2191c780-1992-4210-82b3-68cc750de59c",
-    "winner_prev_match_id": null,
-    "loser_prev_match_id": null
-  },
+  // {
+  //   "id": "464a0d76-fdfc-427e-961c-d46b819f31c4",
+  //   "round": "champ 64",
+  //   "participants": [
+  //     {
+  //       "name": "shane gentry",
+  //       "seed": null,
+  //       "school": "maryland"
+  //     },
+  //     {
+  //       "name": "jarrod patterson",
+  //       "seed": 7,
+  //       "school": "oklahoma"
+  //     }
+  //   ],
+  //   "winner": "jarrod patterson",
+  //   "score": "9-0",
+  //   "winner_next_match_id": "2191c780-1992-4210-82b3-68cc750de59c",
+  //   "winner_prev_match_id": null,
+  //   "loser_prev_match_id": null
+  // },
   {
     "id": "079601b4-a548-4f59-84b1-7767cd956466",
+    "round": "champ 32",
     "participants": [
       {
         "name": "tyler iwamura",
@@ -149,6 +151,7 @@ export const sampleChampionshipBracket3 = [
   },
   {
     "id": "fff64350-d462-446f-b554-30e415b8d9db",
+    "round": "champ 32",
     "participants": [
       {
         "name": "levi mele",
@@ -169,6 +172,7 @@ export const sampleChampionshipBracket3 = [
   },
   {
     "id": "2191c780-1992-4210-82b3-68cc750de59c",
+    "round": "champ 32",
     "participants": [
       {
         "name": "max soria",
@@ -189,6 +193,7 @@ export const sampleChampionshipBracket3 = [
   },
   {
     "id": "3f320708-9610-4f11-82e1-2ad59be853e7",
+    "round": "champ 32",
     "participants": [
       {
         "name": "jon morrison",
@@ -209,6 +214,7 @@ export const sampleChampionshipBracket3 = [
   },
   {
     "id": "4aae9a36-0069-4bf0-b606-6db76bffbfb7",
+    "round": "champ 32",
     "participants": [
       {
         "name": "erik spjut",
@@ -229,6 +235,7 @@ export const sampleChampionshipBracket3 = [
   },
   {
     "id": "9691a9d4-5118-4086-8709-1a23934fb748",
+    "round": "champ 32",
     "participants": [
       {
         "name": "pat rollins",
@@ -249,6 +256,7 @@ export const sampleChampionshipBracket3 = [
   },
   {
     "id": "af461551-c6aa-4754-8003-7c5c3e3b74be",
+    "round": "champ 32",
     "participants": [
       {
         "name": "camden eppert",
@@ -269,6 +277,7 @@ export const sampleChampionshipBracket3 = [
   },
   {
     "id": "af7b0d7b-1a2b-4502-bdab-cb4c6c49622a",
+    "round": "champ 32",
     "participants": [
       {
         "name": "austin miller",
@@ -289,6 +298,7 @@ export const sampleChampionshipBracket3 = [
   },
   {
     "id": "aff767b7-0264-4934-b2db-4cf35b0296d2",
+    "round": "champ 32",
     "participants": [
       {
         "name": "trent sprenkle",
@@ -309,6 +319,7 @@ export const sampleChampionshipBracket3 = [
   },
   {
     "id": "bd6ff82f-6d25-4c21-bcb6-0cc1e2fac001",
+    "round": "champ 32",
     "participants": [
       {
         "name": "nic bedelyon",
@@ -329,6 +340,7 @@ export const sampleChampionshipBracket3 = [
   },
   {
     "id": "bde45158-b10c-4795-9c58-ef66d45e7be0",
+    "round": "champ 32",
     "participants": [
       {
         "name": "nicholas 'nico' megaludis",
@@ -349,6 +361,7 @@ export const sampleChampionshipBracket3 = [
   },
   {
     "id": "be06dd74-90a9-43a7-9e3f-506ce9100773",
+    "round": "champ 32",
     "participants": [
       {
         "name": "johnni dijulius",
@@ -369,6 +382,7 @@ export const sampleChampionshipBracket3 = [
   },
   {
     "id": "c31bdf8f-b270-42f4-b171-ce887007262b",
+    "round": "champ 32",
     "participants": [
       {
         "name": "matt mcdonough",
@@ -389,6 +403,7 @@ export const sampleChampionshipBracket3 = [
   },
   {
     "id": "e5afcfc6-0eed-4b5f-bcd4-bb60b3d031fc",
+    "round": "champ 32",
     "participants": [
       {
         "name": "jerome robinson",
@@ -409,6 +424,7 @@ export const sampleChampionshipBracket3 = [
   },
   {
     "id": "ebe2b011-3d30-4f5b-8944-0fcbc241a893",
+    "round": "champ 32",
     "participants": [
       {
         "name": "shane young",
@@ -429,6 +445,7 @@ export const sampleChampionshipBracket3 = [
   },
   {
     "id": "fe2a75e2-5844-4181-9afa-1e76b394a2b8",
+    "round": "champ 32",
     "participants": [
       {
         "name": "coltin fought",
@@ -449,6 +466,7 @@ export const sampleChampionshipBracket3 = [
   },
   {
     "id": "4e121cf8-ec55-48b8-b468-5b62d9e098eb",
+    "round": "champ 16",
     "participants": [
       {
         "name": "nic bedelyon",
@@ -469,6 +487,7 @@ export const sampleChampionshipBracket3 = [
   },
   {
     "id": "7fe1fb6f-84c4-4bbd-a349-7dd8d7763351",
+    "round": "champ 16",
     "participants": [
       {
         "name": "jon morrison",
@@ -489,6 +508,7 @@ export const sampleChampionshipBracket3 = [
   },
   {
     "id": "850b0793-422a-4907-bedf-cd01b36a7df3",
+    "round": "champ 16",
     "participants": [
       {
         "name": "frank perrelli",
@@ -509,6 +529,7 @@ export const sampleChampionshipBracket3 = [
   },
   {
     "id": "d3796f63-044c-45a6-bf38-3d60a7c47006",
+    "round": "champ 16",
     "participants": [
       {
         "name": "levi mele",
@@ -529,6 +550,7 @@ export const sampleChampionshipBracket3 = [
   },
   {
     "id": "0bce4087-5623-49ad-89bf-d27ff9f55f5f",
+    "round": "champ 16",
     "participants": [
       {
         "name": "camden eppert",
@@ -549,6 +571,7 @@ export const sampleChampionshipBracket3 = [
   },
   {
     "id": "f92b8bf4-cab0-457b-86ea-e442c2bb35f4",
+    "round": "champ 16",
     "participants": [
       {
         "name": "alan waters",
@@ -569,6 +592,7 @@ export const sampleChampionshipBracket3 = [
   },
   {
     "id": "d3ea7979-e3a9-4f63-ba93-a7547970e2c8",
+    "round": "champ 16",
     "participants": [
       {
         "name": "jarrod patterson",
@@ -589,6 +613,7 @@ export const sampleChampionshipBracket3 = [
   },
   {
     "id": "f38f3e5a-3ac8-4f89-aca7-f16830136bdd",
+    "round": "champ 16",
     "participants": [
       {
         "name": "matt mcdonough",
@@ -609,6 +634,7 @@ export const sampleChampionshipBracket3 = [
   },
   {
     "id": "ea5e0cb2-2a9f-4deb-87c3-e233a727d3e0",
+    "round": "champ 8",
     "participants": [
       {
         "name": "anthony zanetta",
@@ -629,6 +655,7 @@ export const sampleChampionshipBracket3 = [
   },
   {
     "id": "328c6836-8b2a-4475-a95f-6a2c7e192710",
+    "round": "champ 8",
     "participants": [
       {
         "name": "nic bedelyon",
@@ -649,6 +676,7 @@ export const sampleChampionshipBracket3 = [
   },
   {
     "id": "f178651e-ea2a-4786-b319-103dfb7c9931",
+    "round": "champ 8",
     "participants": [
       {
         "name": "matt mcdonough",
@@ -669,6 +697,7 @@ export const sampleChampionshipBracket3 = [
   },
   {
     "id": "09198a1d-4962-42ee-91af-ac0e6bcccff2",
+    "round": "champ 8",
     "participants": [
       {
         "name": "nicholas 'nico' megaludis",
@@ -689,6 +718,7 @@ export const sampleChampionshipBracket3 = [
   },
   {
     "id": "ecc03357-62d3-48ce-a067-6f2a692ff0bf",
+    "round": "champ 4",
     "participants": [
       {
         "name": "nic bedelyon",
@@ -709,6 +739,7 @@ export const sampleChampionshipBracket3 = [
   },
   {
     "id": "01cb0dba-6dd2-4d68-b1f1-c3d4a43b5174",
+    "round": "champ 4",
     "participants": [
       {
         "name": "frank perrelli",
@@ -729,6 +760,7 @@ export const sampleChampionshipBracket3 = [
   },
   {
     "id": "284eef04-d45f-4bf8-b7e3-015ae7e40c53",
+    "round": "1st",
     "participants": [
       {
         "name": "matt mcdonough",
